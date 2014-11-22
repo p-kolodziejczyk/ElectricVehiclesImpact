@@ -6,12 +6,20 @@ __includes["my-global.nls"]
 
 
 
-to setup
+to setup-round
   clear-all
-  setup-neighbourhood
-  setup-households
+  setup-neighbourhoods
+  ;setup-households
   reset-ticks
 end
+
+to setup-square
+  clear-all
+  setup-neighbourhoods2
+  ;setup-households
+  reset-ticks
+end
+
 
 to go
   
@@ -19,40 +27,69 @@ to go
 end
 
 
+to setup-neighbourhoods
+  set-default-shape transformers "Flag"
+  set-default-shape users "person"
+  create-transformers 1 [set level "high" set color red set size 10]
+  ask transformers [hatch 6 [set level "medium" set color blue set size 6  create-link-to myself [set thickness 1]  move-to one-of patches with [not any? other transformers in-radius 45]]]
+  ask transformers with [level = "medium"][hatch 3 [set level "low" set color green set size 2 create-link-to myself [set thickness 0.5] move-to one-of patches in-radius 45 with [not any? other transformers in-radius 25]]]
+  ask transformers with [level = "low"][hatch-HHs (72 + random-poisson 30)[set shape "house" set size 3 set color one-of base-colors move-to one-of patches in-radius 11 create-link-to myself]]
+  ask HHs [hatch-users 1]
+end
 
-to setup-neighbourhood
-    ask patches [
-    ifelse [pxcor] of self mod 12 != 0 
-    [ set pcolor green]
-    [ set pcolor blue ] 
-    if [pycor] of self mod 6 = 0
-    [set pcolor blue]
+to setup-neighbourhoods2
+  set-default-shape transformers "Flag"
+  set-default-shape users "person"
+  create-transformers 1 [set level "high" set color red set size 10 set xcor (min-pxcor + max-pxcor / 32)]
+  ask transformers [hatch 6 [set level "medium" set color blue set size 6  create-link-to myself [set thickness 1] set xcor (xcor + max-pxcor / 12)]]
+  ask patches [set pcolor green]
+  let aux 0
+  ask transformers with [level = "medium"][set ycor (max-pycor - max-pycor / 6 - (aux * round (max-pycor / 3))) set aux aux + 1 ]
+  ask transformers with [level = "medium"][set aux 0 hatch 3 [set level "low" set color brown set size 2 create-link-to myself [set thickness 0.5] set xcor (xcor + max-pxcor / 12) set ycor (ycor + 12 - aux * 12) set aux aux + 1]]
+  ask transformers with [level = "low"][
+    ask patches with [pycor = [ycor] of myself AND pxcor > [xcor] of myself][set pcolor blue]
+    set aux 0.9 hatch-HHs (72 + random-poisson 30)[set shape "house" set size 3 set color one-of base-colors create-link-to myself [hide-link]
+    set xcor xcor + round (aux) * 6 
+    ifelse (remainder (aux + 0.1) 1 = 0 ) [set ycor ycor + 4][set ycor ycor - 2] set aux aux + 0.5]
   ]
+  ask HHs [hatch-users (1 + random 1) [set xcor xcor + 2 set color black create-link-to myself [hide-link]]]
 end
 
 
-to setup-households
-    create-HHs 50
-  
-  ask HHs [
-    set shape "house"
-    set size 3
-    move-to one-of patches with [pcolor = green AND not any? other HHs in-radius 3 AND all? neighbors [pcolor = green]]
-    ;set heading 0
-    ;fd 1
-    
-    ] 
-  
-end
+
+;to setup-neighbourhood
+;    ask patches [
+;    ifelse [pxcor] of self mod 12 != 0 
+;    [ set pcolor green]
+;    [ set pcolor blue ] 
+;    if [pycor] of self mod 6 = 0
+;    [set pcolor blue]
+;  ]
+;end
+;
+;
+;to setup-households
+;    create-HHs 50
+;  
+;  ask HHs [
+;    set shape "house"
+;    set size 3
+;    move-to one-of patches with [pcolor = green AND not any? other HHs in-radius 3 AND all? neighbors [pcolor = green]]
+;    ;set heading 0
+;    ;fd 1
+;    
+;    ] 
+;  
+;end
 @#$#@#$#@
 GRAPHICS-WINDOW
-210
+425
 10
-804
-529
-36
-30
-8.0
+1638
+764
+200
+120
+3.0
 1
 10
 1
@@ -62,10 +99,10 @@ GRAPHICS-WINDOW
 1
 1
 1
--36
-36
--30
-30
+-200
+200
+-120
+120
 0
 0
 1
@@ -75,25 +112,25 @@ ticks
 BUTTON
 14
 26
-77
+114
 59
 NIL
-setup
+setup-round
 NIL
 1
 T
 OBSERVER
 NIL
-S
+R
 NIL
 NIL
 1
 
 BUTTON
 13
-66
+153
 76
-99
+186
 NIL
 Go
 T
@@ -108,9 +145,9 @@ NIL
 
 BUTTON
 11
-105
+192
 90
-138
+225
 Go Once
 Go
 NIL
@@ -122,6 +159,34 @@ G
 NIL
 NIL
 1
+
+BUTTON
+14
+65
+114
+98
+NIL
+setup-square
+NIL
+1
+T
+OBSERVER
+NIL
+S
+NIL
+NIL
+1
+
+MONITOR
+309
+16
+379
+61
+NIL
+count HHs
+17
+1
+11
 
 @#$#@#$#@
 ## WHAT IS IT?

@@ -1,5 +1,7 @@
 breed [EVs EV]
 breed [HHs HH]
 breed [transformers transformer]
+breed [users user]
 
+transformers-own [capacity level]
 
