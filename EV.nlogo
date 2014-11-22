@@ -31,9 +31,9 @@ to setup-neighbourhoods
   set-default-shape transformers "Flag"
   set-default-shape users "person"
   create-transformers 1 [set level "high" set color red set size 10]
-  ask transformers [hatch 6 [set level "medium" set color blue set size 6  create-link-to myself [set thickness 1]  move-to one-of patches with [not any? other transformers in-radius 45]]]
-  ask transformers with [level = "medium"][hatch 3 [set level "low" set color green set size 2 create-link-to myself [set thickness 0.5] move-to one-of patches in-radius 45 with [not any? other transformers in-radius 25]]]
-  ask transformers with [level = "low"][hatch-HHs (72 + random-poisson 30)[set shape "house" set size 3 set color one-of base-colors move-to one-of patches in-radius 11 create-link-to myself]]
+ ask transformers [hatch 7 [set level "medium" set color blue set size 6  create-link-to myself [set thickness 1]  move-to one-of patches with [not any? other transformers in-radius 90]]]
+  ask transformers with [level = "medium"][hatch 3 [set level "low" set color green set size 2 create-link-to myself [set thickness 0.5] move-to one-of patches in-radius 90 with [not any? other transformers in-radius 45]]]
+  ask transformers with [level = "low"][hatch-HHs (65 + random-poisson 22)[set shape "house" set size 3 set color one-of base-colors move-to one-of patches in-radius 22 with [not any? other HHs-here] create-link-to myself]]
   ask HHs [hatch-users 1]
 end
 
@@ -41,14 +41,14 @@ to setup-neighbourhoods2
   set-default-shape transformers "Flag"
   set-default-shape users "person"
   create-transformers 1 [set level "high" set color red set size 10 set xcor (min-pxcor + max-pxcor / 32)]
-  ask transformers [hatch 6 [set level "medium" set color blue set size 6  create-link-to myself [set thickness 1] set xcor (xcor + max-pxcor / 12)]]
+  ask transformers [hatch 7 [set level "medium" set color blue set size 6  create-link-to myself [set thickness 1] set xcor (xcor + max-pxcor / 12)]]
   ask patches [set pcolor green]
   let aux 0
-  ask transformers with [level = "medium"][set ycor (max-pycor - max-pycor / 6 - (aux * round (max-pycor / 3))) set aux aux + 1 ]
+  ask transformers with [level = "medium"][set ycor (max-pycor - max-pycor / 6 - (aux * round (max-pycor / 3.5))) set aux aux + 1 ]
   ask transformers with [level = "medium"][set aux 0 hatch 3 [set level "low" set color brown set size 2 create-link-to myself [set thickness 0.5] set xcor (xcor + max-pxcor / 12) set ycor (ycor + 12 - aux * 12) set aux aux + 1]]
   ask transformers with [level = "low"][
     ask patches with [pycor = [ycor] of myself AND pxcor > [xcor] of myself][set pcolor blue]
-    set aux 0.9 hatch-HHs (72 + random-poisson 30)[set shape "house" set size 3 set color one-of base-colors create-link-to myself [hide-link]
+    set aux 0.9 hatch-HHs (65 + random-poisson 22)[set shape "house" set size 3 set color one-of base-colors create-link-to myself [hide-link]
     set xcor xcor + round (aux) * 6 
     ifelse (remainder (aux + 0.1) 1 = 0 ) [set ycor ycor + 4][set ycor ycor - 2] set aux aux + 0.5]
   ]
@@ -83,12 +83,12 @@ end
 ;end
 @#$#@#$#@
 GRAPHICS-WINDOW
-425
+408
 10
-1638
-764
+1621
+872
 200
-120
+138
 3.0
 1
 10
@@ -101,8 +101,8 @@ GRAPHICS-WINDOW
 1
 -200
 200
--120
-120
+-138
+138
 0
 0
 1
