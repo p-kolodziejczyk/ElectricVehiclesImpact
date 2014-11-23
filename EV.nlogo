@@ -1,10 +1,5 @@
 __includes["my-global.nls"]
 
-
-
-
-
-
 to setup-round
   clear-all
   setup-neighbourhoods
@@ -21,9 +16,15 @@ end
 
 
 to go
-  ask transformers with [level ="low"][set demand sum [power] of EVs-neighbors ]
-  ask transformers with [level ="medium"][set demand sum [demand] of transformers-neighbors with [level="low"]]
-  ask transformers with [level ="high"][set demand sum [demand] of transformer-neighbors with [level="medium"]]
+  ;calc demand in the grid and upgrad if necessary  -- coincidence factor set to 1 for now
+  ask HHs [set demand sum [power] of out-link-neighbors]
+  ask transformers with [level ="low"][set demand calc_coincidence(myself) * sum [demand] of out-link-neighbors]        
+  ask transformers with [level ="medium"][set demand calc_coincidence(myself) * sum [demand] of out-link-neighbors]
+  ask transformers with [level ="high"][set demand calc_coincidence(myself) * sum [demand] of out-link-neighbors]
+  ask transformers [if (demand > capacity)[upgrade]]
+  ;;
+  ask users [buy_cars]
+  update_offers
   tick  
 end
 
@@ -35,7 +36,7 @@ to setup-neighbourhoods
  ask transformers [hatch 7 [set level "medium" set color blue set size 6  create-link-to myself [set thickness 1]  move-to one-of patches with [not any? other transformers in-radius 90]]]
   ask transformers with [level = "medium"][hatch 3 [set level "low" set color green set size 2 create-link-to myself [set thickness 0.5] move-to one-of patches in-radius 90 with [not any? other transformers in-radius 45]]]
   ask transformers with [level = "low"][hatch-HHs (65 + random-poisson 22)[set shape "house" set size 3 set color one-of base-colors move-to one-of patches in-radius 22 with [not any? other HHs-here] create-link-to myself]]
-  ask HHs [hatch-users 1]
+  ask HHs [hatch-users 1 [create-link-to myself [hide-link]]]
 end
 
 to setup-neighbourhoods2
@@ -57,6 +58,23 @@ to setup-neighbourhoods2
   ask transformers [set demand 0]
 end
 
+to upgrade 
+end
+
+
+to buy_cars
+end
+
+to update_offers
+end
+
+to-report  calc_coincidence[trans]
+  ; function takes the transformer and calculates the coincidence factor based on how many nodes are attached to it and on which 
+  ;level it is
+  if ([level] of trans = "low")[report 1]
+  if ([level] of trans = "medium")[report 1]
+  if ([level] of trans = "high")[report 1]
+end
 
 
 ;to setup-neighbourhood

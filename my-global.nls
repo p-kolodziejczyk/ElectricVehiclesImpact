@@ -9,7 +9,7 @@ transformers-own [capacity level demand]
 
 EVs-own [Battery_capacity power range]
 ;power is the charging power in kW
-
+HHS-own [demand]
 users-own [preference influence_range range_min]
 ; the preference variable will be a list of preference variables for
 ;different attributes of the cars.
