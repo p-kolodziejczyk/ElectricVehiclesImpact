@@ -5,7 +5,6 @@ __includes["my-global.nls"]
 
 
 
-
 to setup-round
   clear-all
   setup-neighbourhoods
@@ -22,7 +21,9 @@ end
 
 
 to go
-  
+  ask transformers with [level ="low"][set demand sum [power] of EVs-neighbors ]
+  ask transformers with [level ="medium"][set demand sum [demand] of transformers-neighbors with [level="low"]]
+  ask transformers with [level ="high"][set demand sum [demand] of transformer-neighbors with [level="medium"]]
   tick  
 end
 
@@ -53,6 +54,7 @@ to setup-neighbourhoods2
     ifelse (remainder (aux + 0.1) 1 = 0 ) [set ycor ycor + 4][set ycor ycor - 2] set aux aux + 0.5]
   ]
   ask HHs [hatch-users (1 + random 1) [set xcor xcor + 2 set color black create-link-to myself [hide-link]]]
+  ask transformers [set demand 0]
 end
 
 
