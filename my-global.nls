@@ -2,16 +2,14 @@ breed [EVs EV]
 breed [HHs HH]
 breed [transformers transformer]
 breed [users user]
+undirected-link-breed [friendships friendship]
+directed-link-breed [power-lines power-line]
+directed-link-breed [associations association] 
+
 
 transformers-own [capacity level demand]
-;the capacity the demand and on which level high medium or low voltage 
-;the transformer is positioned
-
 EVs-own [Battery_capacity power range]
-;power is the charging power in kW
 HHS-own [demand]
 users-own [preference influence_range range_min]
-; the preference variable will be a list of preference variables for
-;different attributes of the cars.
-; the influence_range is the radius in which the user influences others
-; range_min is the minimum range the user requires from the EVs
+
+power-lines-own [line-capacity]
