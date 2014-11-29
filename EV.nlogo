@@ -1,114 +1,61 @@
-__includes["my-global.nls"]
+__includes["my-global.nls" "RunProcedures.nls"]
 
-to setup-round
-  clear-all
-  setup-neighbourhoods
-  ;setup-households
-  reset-ticks
-end
 
 to setup-square
   clear-all
-  setup-neighbourhoods2
-  ;setup-households
+  setup-neighbourhoods
+  ;setup-social-circle
   reset-ticks
+  ;setup-EVs
 end
 
-
-to go
-  ;calc demand in the grid and upgrad if necessary  -- coincidence factor set to 1 for now
-  ask HHs [set demand sum [power] of out-link-neighbors]
-  ask transformers with [level ="low"][set demand calc_coincidence(myself) * sum [demand] of out-link-neighbors]        
-  ask transformers with [level ="medium"][set demand calc_coincidence(myself) * sum [demand] of out-link-neighbors]
-  ask transformers with [level ="high"][set demand calc_coincidence(myself) * sum [demand] of out-link-neighbors]
-  ask transformers [if (demand > capacity)[upgrade]]
-  ;;
-  ask users [buy_cars]
-  update_offers
+to go ;observer
+  update-area-user-impact
+  print [preference] of users
   tick  
 end
+
 
 
 to setup-neighbourhoods
   set-default-shape transformers "Flag"
   set-default-shape users "person"
-  create-transformers 1 [set level "high" set color red set size 10]
- ask transformers [hatch 7 [set level "medium" set color blue set size 6  create-link-to myself [set thickness 1]  move-to one-of patches with [not any? other transformers in-radius 90]]]
-  ask transformers with [level = "medium"][hatch 3 [set level "low" set color green set size 2 create-link-to myself [set thickness 0.5] move-to one-of patches in-radius 90 with [not any? other transformers in-radius 45]]]
-  ask transformers with [level = "low"][hatch-HHs (65 + random-poisson 22)[set shape "house" set size 3 set color one-of base-colors move-to one-of patches in-radius 22 with [not any? other HHs-here] create-link-to myself]]
-  ask HHs [hatch-users 1 [create-link-to myself [hide-link]]]
-end
-
-to setup-neighbourhoods2
-  set-default-shape transformers "Flag"
-  set-default-shape users "person"
-  create-transformers 1 [set level "high" set color red set size 10 set xcor (min-pxcor + max-pxcor / 32)]
-  ask transformers [hatch 7 [set level "medium" set color blue set size 6  create-link-to myself [set thickness 1] set xcor (xcor + max-pxcor / 12)]]
+  create-transformers 1 [set level "high" set color blue set size 20 set xcor (min-pxcor + max-pxcor / 32)]
+  ask transformers [hatch (6 + random 3) [set level "medium" set size 10  create-power-line-to myself [set thickness 1] set xcor (xcor + max-pxcor / 14)]]
   ask patches [set pcolor green]
   let aux 0
-  ask transformers with [level = "medium"][set ycor (max-pycor - max-pycor / 6 - (aux * round (max-pycor / 3.5))) set aux aux + 1 ]
-  ask transformers with [level = "medium"][set aux 0 hatch 3 [set level "low" set color brown set size 2 create-link-to myself [set thickness 0.5] set xcor (xcor + max-pxcor / 12) set ycor (ycor + 12 - aux * 12) set aux aux + 1]]
+  ask transformers with [level = "medium"][set ycor round (max-pycor - max-pycor / 7 - (aux * round (max-pycor / 4.1))) set aux aux + 1 ]
+  ask transformers with [level = "medium"][set aux 0 hatch (2 + random 2) [set level "low" set size 5 create-power-line-to myself [set thickness 0.5] set xcor round (xcor + max-pxcor / 12) set ycor round (ycor + 12 - aux * 12) set aux aux + 1]]
   ask transformers with [level = "low"][
     ask patches with [pycor = [ycor] of myself AND pxcor > [xcor] of myself][set pcolor blue]
-    set aux 0.9 hatch-HHs (65 + random-poisson 22)[set shape "house" set size 3 set color one-of base-colors create-link-to myself [hide-link]
+    set aux 0.9 hatch-HHs round ((21 / count transformers with [level = "low"]) * (65 + random-poisson 22))[set shape "house" set color brown set size 3 create-power-line-to myself [hide-link]
     set xcor xcor + round (aux) * 6 
     ifelse (remainder (aux + 0.1) 1 = 0 ) [set ycor ycor + 4][set ycor ycor - 2] set aux aux + 0.5]
   ]
-  ask HHs [hatch-users (1 + random 1) [set xcor xcor + 2 set color black create-link-to myself [hide-link]]]
+  ask HHs [hatch-users 1 [set xcor xcor + 2 set color black create-association-to myself [hide-link]]]
   ask transformers [set demand 0]
 end
 
-to upgrade 
+to setup-social-circle
+    ask users [
+    create-friendships-with users with [self > myself and
+                                    random-float count users < average-number-friendships][hide-link]]
+    ask users [set preference random-float 1.0]
 end
 
-
-to buy_cars
+to setup-EVs
+  set-default-shape EVs "car"
+  ask n-of initial-EVs users [hatch-EVs 1 [set color blue set ycor ycor - 3 create-association-to myself create-associations-to [out-link-neighbors] of myself]]
+  
 end
-
-to update_offers
-end
-
-to-report  calc_coincidence[trans]
-  ; function takes the transformer and calculates the coincidence factor based on how many nodes are attached to it and on which 
-  ;level it is
-  if ([level] of trans = "low")[report 1]
-  if ([level] of trans = "medium")[report 1]
-  if ([level] of trans = "high")[report 1]
-end
-
-
-;to setup-neighbourhood
-;    ask patches [
-;    ifelse [pxcor] of self mod 12 != 0 
-;    [ set pcolor green]
-;    [ set pcolor blue ] 
-;    if [pycor] of self mod 6 = 0
-;    [set pcolor blue]
-;  ]
-;end
-;
-;
-;to setup-households
-;    create-HHs 50
-;  
-;  ask HHs [
-;    set shape "house"
-;    set size 3
-;    move-to one-of patches with [pcolor = green AND not any? other HHs in-radius 3 AND all? neighbors [pcolor = green]]
-;    ;set heading 0
-;    ;fd 1
-;    
-;    ] 
-;  
-;end
 @#$#@#$#@
 GRAPHICS-WINDOW
 408
 10
-1621
-872
-200
-138
+1921
+1064
+250
+170
 3.0
 1
 10
@@ -119,32 +66,15 @@ GRAPHICS-WINDOW
 1
 1
 1
--200
-200
--138
-138
+-250
+250
+-170
+170
 0
 0
 1
 ticks
 30.0
-
-BUTTON
-14
-26
-114
-59
-NIL
-setup-round
-NIL
-1
-T
-OBSERVER
-NIL
-R
-NIL
-NIL
-1
 
 BUTTON
 13
@@ -181,9 +111,9 @@ NIL
 1
 
 BUTTON
-14
+15
 65
-114
+115
 98
 NIL
 setup-square
@@ -207,6 +137,92 @@ count HHs
 17
 1
 11
+
+SLIDER
+171
+340
+396
+373
+average-number-friendships
+average-number-friendships
+0
+60
+28
+1
+1
+NIL
+HORIZONTAL
+
+MONITOR
+277
+119
+385
+164
+NIL
+count friendships
+17
+1
+11
+
+SLIDER
+171
+411
+382
+444
+size-of-area-influence
+size-of-area-influence
+0
+60
+12
+6
+1
+patches
+HORIZONTAL
+
+SLIDER
+172
+446
+344
+479
+user-area-impact
+user-area-impact
+0
+0.1
+0.05
+0.005
+1
+NIL
+HORIZONTAL
+
+SLIDER
+171
+375
+343
+408
+impact-on-friendships
+impact-on-friendships
+0
+0.1
+0.05
+0.01
+1
+NIL
+HORIZONTAL
+
+SLIDER
+10
+232
+182
+265
+initial-EVs
+initial-EVs
+0
+100
+49
+1
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
