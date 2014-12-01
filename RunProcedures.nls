@@ -7,7 +7,7 @@ to update-area-user-impact
   ask users with [any? in-association-neighbors][
     let i 0
     while [i <= size-of-area-influence / 6][
-      ask other users in-radius (6 * i) with [distance myself >= (6 * (i - 1))][
+      ask other users in-radius (6 * i) with [distance myself > (6 * (i - 1))][
           set preference preference * (1 + user-area-impact / i) if preference > 1 [set preference 1] set label precision preference 2]
       set i i + 1     
       ]

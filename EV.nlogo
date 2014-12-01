@@ -7,11 +7,14 @@ to setup-square
   ;setup-social-circle
   reset-ticks
   ;setup-EVs
+  distribute-income
+  update-plots
 end
 
 to go ;observer
   update-area-user-impact
   print [preference] of users
+  
   tick  
 end
 
@@ -47,6 +50,34 @@ to setup-EVs
   set-default-shape EVs "car"
   ask n-of initial-EVs users [hatch-EVs 1 [set color blue set ycor ycor - 3 create-association-to myself create-associations-to [out-link-neighbors] of myself]]
   
+end
+
+
+to distribute-income
+  let income-list 0
+  ifelse neighbourhood-income = "High" [
+    set income-list [35 40 45 55 75 100]]
+  [ifelse neighbourhood-income = "Medium" [
+      set income-list [25 30 35 40 45 55]]
+  [set income-list [15 20 25 30 35 40]]]
+  
+  ask n-of 10 users [set income one-of income-list set label income]
+  
+    while [ any? users with [ income = 0 ] ] [
+    ask users with [ income != 0 ] [
+      let pos position [income] of self income-list
+      let low-bound pos - 1 if low-bound < 0 [set low-bound 0]
+      let up-bound pos + 1 if up-bound > 9 [set up-bound 9]
+      let sub-income sublist income-list (low-bound)(up-bound)
+      ask other users in-radius 12 with [ income = 0 ][ 
+        set income one-of sub-income set label income]
+      set low-bound pos - 2 if low-bound < 0 [set low-bound 0]
+      set up-bound pos + 2 if up-bound > 5 [set up-bound 5]
+      set sub-income sublist income-list (low-bound)(up-bound)
+      ask other users in-radius 30 with [ income = 0 ][
+        set income one-of sub-income set label income]
+    ]
+    ]
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -147,7 +178,7 @@ average-number-friendships
 average-number-friendships
 0
 60
-28
+18
 1
 1
 NIL
@@ -173,7 +204,7 @@ size-of-area-influence
 size-of-area-influence
 0
 60
-12
+18
 6
 1
 patches
@@ -188,7 +219,7 @@ user-area-impact
 user-area-impact
 0
 0.1
-0.05
+0.1
 0.005
 1
 NIL
@@ -223,6 +254,34 @@ initial-EVs
 1
 NIL
 HORIZONTAL
+
+CHOOSER
+10
+269
+160
+314
+neighbourhood-income
+neighbourhood-income
+"High" "Medium" "Low"
+2
+
+PLOT
+10
+575
+384
+787
+income disparity histogram
+income value
+number
+15.0
+100.0
+0.0
+50.0
+true
+false
+"" ""
+PENS
+"default" 5.0 1 -16777216 true "" "histogram [income] of users"
 
 @#$#@#$#@
 ## WHAT IS IT?
