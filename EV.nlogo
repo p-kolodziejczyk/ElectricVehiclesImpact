@@ -23,8 +23,8 @@ end
 to setup-neighbourhoods
   set-default-shape transformers "Flag"
   set-default-shape users "person"
-  create-transformers 1 [set level "high" set color blue set size 20 set xcor (min-pxcor + max-pxcor / 32)]
-  ask transformers [hatch (6 + random 3) [set level "medium" set size 10  create-power-line-to myself [set thickness 1] set xcor (xcor + max-pxcor / 14)]]
+  create-transformers 1 [set level "high" set color blue set size 20 set xcor round (min-pxcor + max-pxcor / 32)]
+  ask transformers [hatch (6 + random 3) [set level "medium" set size 10  create-power-line-to myself [set thickness 1] set xcor round (xcor + max-pxcor / 14)]]
   ask patches [set pcolor green]
   let aux 0
   ask transformers with [level = "medium"][set ycor round (max-pycor - max-pycor / 7 - (aux * round (max-pycor / 4.1))) set aux aux + 1 ]
@@ -41,8 +41,7 @@ end
 
 to setup-social-circle
     ask users [
-    create-friendships-with users with [self > myself and
-                                    random-float count users < average-number-friendships][hide-link]]
+    create-friendships-with users with [self > myself and random-float count users < average-number-friendships][hide-link]]
     ask users [set preference random-float 1.0]
 end
 
@@ -69,13 +68,13 @@ to distribute-income
       let low-bound pos - 1 if low-bound < 0 [set low-bound 0]
       let up-bound pos + 1 if up-bound > 9 [set up-bound 9]
       let sub-income sublist income-list (low-bound)(up-bound)
-      ask other users in-radius 12 with [ income = 0 ][ 
+      ask other users in-radius 6 with [ income = 0 ][ 
         set income one-of sub-income set label income]
       set low-bound pos - 2 if low-bound < 0 [set low-bound 0]
       set up-bound pos + 2 if up-bound > 5 [set up-bound 5]
       set sub-income sublist income-list (low-bound)(up-bound)
-      ask other users in-radius 30 with [ income = 0 ][
-        set income one-of sub-income set label income]
+      if any? users in-radius 30 with [ income = 0 ][ask one-of users in-radius 30 with [ income = 0 ][
+        set income one-of sub-income set label income]]
     ]
     ]
 end
@@ -178,7 +177,7 @@ average-number-friendships
 average-number-friendships
 0
 60
-18
+4
 1
 1
 NIL
@@ -234,7 +233,7 @@ impact-on-friendships
 impact-on-friendships
 0
 0.1
-0.05
+0
 0.01
 1
 NIL
@@ -249,7 +248,7 @@ initial-EVs
 initial-EVs
 0
 100
-49
+50
 1
 1
 NIL
@@ -274,7 +273,7 @@ income disparity histogram
 income value
 number
 15.0
-100.0
+110.0
 0.0
 50.0
 true
