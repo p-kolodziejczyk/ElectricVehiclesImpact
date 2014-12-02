@@ -4,10 +4,11 @@ __includes["my-global.nls" "RunProcedures.nls"]
 to setup-square
   clear-all
   setup-neighbourhoods
-  ;setup-social-circle
+  setup-social-circle
   reset-ticks
   ;setup-EVs
   distribute-income
+  distribute-demand-capacity
   update-plots
 end
 
@@ -77,6 +78,14 @@ to distribute-income
         set income one-of sub-income set label income]]
     ]
     ]
+end
+
+to distribute-demand-capacity
+  ask HHs [set base_demand random-normal Mean-Base-Demand 1.5]
+  let total_demand  sum [base_demand] of HHs
+  ask transformers with [level = "low"] [set capacity (Total-capacity * sum [base_demand] of HHs with [out-power-line-neighbor? myself] / total_demand )]
+  ask transformers with [level = "medium"] [set capacity sum [capacity] of transformers with [out-power-line-neighbor? myself]]
+  ask transformers with [level = "high"] [set capacity sum [capacity] of transformers with [out-power-line-neighbor? myself]]
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -177,7 +186,7 @@ average-number-friendships
 average-number-friendships
 0
 60
-4
+13
 1
 1
 NIL
@@ -248,7 +257,7 @@ initial-EVs
 initial-EVs
 0
 100
-50
+38
 1
 1
 NIL
@@ -281,6 +290,36 @@ false
 "" ""
 PENS
 "default" 5.0 1 -16777216 true "" "histogram [income] of users"
+
+SLIDER
+171
+482
+346
+515
+Total-capacity
+Total-capacity
+2000
+80000
+67813
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+169
+515
+370
+548
+Mean-Base-Demand
+Mean-Base-Demand
+1
+20
+4
+1
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?

@@ -9,7 +9,7 @@ directed-link-breed [associations association]
 
 transformers-own [capacity level demand]
 EVs-own [Battery_capacity power range]
-HHS-own [demand]
+HHS-own [demand base_demand]
 users-own [preference influence_range range_min income]
 
 power-lines-own [line-capacity]
