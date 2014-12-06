@@ -1,15 +1,48 @@
-to update-firndship-impact
-  ask users with [not any? in-association-neighbors][ask friendship-neighbors [set preference preference * (1 - impact-on-friendships / 100) if preference < 0 [set preference 0]]]
-  ask users with [any? in-association-neighbors][ask friendship-neighbors [set preference preference * (1 + impact-on-friendships) if preference > 1 [set preference 1]]] 
+to update-friendship-impact ;Observer
+  ask Users with [not any? in-association-neighbors][ask friendship-neighbors [set Preference Preference * (1 - impact-on-friendships / 100) if Preference < 0 [set Preference 0]]]
+  ask Users with [any? in-association-neighbors][ask friendship-neighbors [set Preference Preference * (1 + impact-on-friendships) if Preference > 1 [set Preference 1]]] 
 end
 
-to update-area-user-impact
-  ask users with [any? in-association-neighbors][
+to update-area-user-impact ;Observer
+  ask Users with [any? in-association-neighbors][
     let i 0
     while [i <= size-of-area-influence / 6][
-      ask other users in-radius (6 * i) with [distance myself > (6 * (i - 1))][
-          set preference preference * (1 + user-area-impact / i) if preference > 1 [set preference 1] set label precision preference 2]
+      ask other Users in-radius (6 * i) with [distance myself > (6 * (i - 1))][
+          set Preference Preference * (1 + user-area-impact / i) if Preference > 1 [set Preference 1] set label precision Preference 2]
       set i i + 1     
       ]
   ]
+end
+
+
+
+to update-yearly
+  ask Users [set Income Income * EconGrow] ; update income for users
+end
+
+to update-monthly
+ ask HHs [set HHAverage HHAverage * HHGrowMonthly set HHPeak HHFactor * HHAverage ] ; update power demand of households
+end
+
+to-report coin-factor
+  
+  report 1
+end
+
+to determine-used-capacity
+  ask Transformers with [level = "NHtransformer"][    ;NH
+    ask in-power-line-neighbors [
+      ask in-power-line-neighbors [
+       set Overcapacity Capacity - sum [HHPeak] of in-power-line-neighbors
+        let aux 0
+        ask in-power-line-neighbors [let LVCoin coin-factor set aux (LVCoin * sum [EVPeak] of in-association-neighbors with [is-turtle? "EV"])]
+        set Overcapacity Overcapacity - aux
+      ]
+      let TFCoin coin-factor
+      set Overcapacity Capacity - TFCoin * (sum [Capacity - Overcapacity] of in-power-line-neighbors)
+    ]
+  let NHCoin coin-factor
+  set Overcapacity Capacity - NHCoin * (sum [Capacity - Overcapacity] of in-power-line-neighbors)
+  ]
+  ask Transformers [ if Overcapacity < 0 [set color red]]
 end

@@ -1,11 +1,12 @@
 __includes["my-global.nls" "RunProcedures.nls"]
 
 
-to setup-square
+to setup-square ;observer
   clear-all
+  reset-ticks
+  set-global-values
   setup-neighbourhoods
   setup-social-circle
-  reset-ticks
   ;setup-EVs
   distribute-income
   distribute-demand-capacity
@@ -13,79 +14,115 @@ to setup-square
 end
 
 to go ;observer
+  determine-used-capacity
   update-area-user-impact
-  print [preference] of users
-  
+  update-friendship-impact
+  update-monthly
+  if (remainder ticks 12 = 0) [update-yearly]
   tick  
 end
 
 
 
 to setup-neighbourhoods
-  set-default-shape transformers "Flag"
-  set-default-shape users "person"
-  create-transformers 1 [set level "high" set color blue set size 20 set xcor round (min-pxcor + max-pxcor / 32)]
-  ask transformers [hatch (6 + random 3) [set level "medium" set size 10  create-power-line-to myself [set thickness 1] set xcor round (xcor + max-pxcor / 14)]]
+  set-default-shape Transformers "Flag"
+  set-default-shape Users "person"
+  create-Transformers 1 [set level "NHtransformer" set color blue set size 20 set xcor round (min-pxcor + max-pxcor / 32)]
+  ask Transformers [hatch (6 + random 3) [set level "LVtransformer" set size 10  create-power-line-to myself [set thickness 1] set xcor round (xcor + max-pxcor / 14)]]
   ask patches [set pcolor green]
   let aux 0
-  ask transformers with [level = "medium"][set ycor round (max-pycor - max-pycor / 7 - (aux * round (max-pycor / 4.1))) set aux aux + 1 ]
-  ask transformers with [level = "medium"][set aux 0 hatch (2 + random 2) [set level "low" set size 5 create-power-line-to myself [set thickness 0.5] set xcor round (xcor + max-pxcor / 12) set ycor round (ycor + 12 - aux * 12) set aux aux + 1]]
-  ask transformers with [level = "low"][
+  ask Transformers with [level = "LVtransformer"][set ycor round (max-pycor - max-pycor / 7 - (aux * round (max-pycor / 4.1))) set aux aux + 1 ]
+  ask Transformers with [level = "LVtransformer"][set aux 0 hatch (2 + random 2) [set level "LVline" set size 5 create-power-line-to myself [set thickness 0.5] set xcor round (xcor + max-pxcor / 12) set ycor round (ycor + 12 - aux * 12) set aux aux + 1]]
+  ask Transformers with [level = "LVline"][
     ask patches with [pycor = [ycor] of myself AND pxcor > [xcor] of myself][set pcolor blue]
-    set aux 0.9 hatch-HHs round ((21 / count transformers with [level = "low"]) * (65 + random-poisson 22))[set shape "house" set color brown set size 3 create-power-line-to myself [hide-link]
+    set aux 0.9 hatch-HHs round ((21 / count Transformers with [level = "LVline"]) * (65 + random-poisson 22))[set shape "house" set color brown set size 3 create-power-line-to myself [hide-link]
     set xcor xcor + round (aux) * 6 
     ifelse (remainder (aux + 0.1) 1 = 0 ) [set ycor ycor + 4][set ycor ycor - 2] set aux aux + 0.5]
   ]
-  ask HHs [hatch-users 1 [set xcor xcor + 2 set color black create-association-to myself [hide-link]]]
-  ask transformers [set demand 0]
+  ask HHs [hatch-Users 1 [set xcor xcor + 2 set color black create-association-to myself [hide-link]]]
+  ask Transformers [set demand 0]
 end
 
 to setup-social-circle
-    ask users [
-    create-friendships-with users with [self > myself and random-float count users < average-number-friendships][hide-link]]
-    ask users [set preference random-float 1.0]
+    ask Users [
+    create-friendships-with Users with [self > myself and random-float count Users < average-number-friendships][hide-link]]
+    ask Users [set Preference random-float 1.0]
 end
 
 to setup-EVs
   set-default-shape EVs "car"
-  ask n-of initial-EVs users [hatch-EVs 1 [set color blue set ycor ycor - 3 create-association-to myself create-associations-to [out-link-neighbors] of myself]]
+  ask n-of initial-EVs Users [hatch-EVs 1 [set color blue set ycor ycor - 3 create-association-to myself create-associations-to [out-link-neighbors] of myself]]
   
 end
 
 
 to distribute-income
-  let income-list 0
-  ifelse neighbourhood-income = "High" [
-    set income-list [35 40 45 55 75 100]]
-  [ifelse neighbourhood-income = "Medium" [
-      set income-list [25 30 35 40 45 55]]
-  [set income-list [15 20 25 30 35 40]]]
+ask users [
+  let RSource random 100
+  let RIncome 1 + random 10
+  let Multiplier 1
+  Ifelse RSource <= (12 * NHRichFactor) [set IncSource 0 set Multiplier 1.3][
+    Ifelse RSource <= (12 + (36 / NHRichFactor)) [set IncSource 1][
+      set IncSource 2 set Multiplier 1.15]]
   
-  ask n-of 10 users [set income one-of income-list set label income]
+  ifelse RIncome = 1 
+    [set Income 8 * NHRichFactor * Multiplier][
+      ifelse RIncome = 2 
+        [set Income 13 * NHRichFactor * Multiplier][
+          ifelse RIncome = 3 
+            [set Income 17 * NHRichFactor * Multiplier][
+              ifelse RIncome = 4 
+                 [set Income 18 * NHRichFactor * Multiplier][
+                   ifelse RIncome = 5 
+                     [set Income 20 * NHRichFactor * Multiplier][
+                       ifelse RIncome = 6 
+                         [set Income 22 * NHRichFactor * Multiplier][
+                           ifelse RIncome = 7 
+                             [set Income 24 * NHRichFactor * Multiplier][
+                               ifelse RIncome = 8 
+                                 [set Income 28 * NHRichFactor * Multiplier][
+                                   ifelse RIncome = 9 
+                                     [set Income 33 * NHRichFactor * Multiplier]
+                                     [set Income 58 * NHRichFactor * Multiplier]
+                                 ]
+                             ]
+                         ]
+                     ]
+                 ]
+            ]
+        ]
+    ]
+    
+]  
   
-    while [ any? users with [ income = 0 ] ] [
-    ask users with [ income != 0 ] [
-      let pos position [income] of self income-list
-      let low-bound pos - 1 if low-bound < 0 [set low-bound 0]
-      let up-bound pos + 1 if up-bound > 9 [set up-bound 9]
-      let sub-income sublist income-list (low-bound)(up-bound)
-      ask other users in-radius 6 with [ income = 0 ][ 
-        set income one-of sub-income set label income]
-      set low-bound pos - 2 if low-bound < 0 [set low-bound 0]
-      set up-bound pos + 2 if up-bound > 5 [set up-bound 5]
-      set sub-income sublist income-list (low-bound)(up-bound)
-      if any? users in-radius 30 with [ income = 0 ][ask one-of users in-radius 30 with [ income = 0 ][
-        set income one-of sub-income set label income]]
-    ]
-    ]
+  
+  
+
 end
 
 to distribute-demand-capacity
-  ask HHs [set base_demand random-normal Mean-Base-Demand 1.5]
-  let total_demand  sum [base_demand] of HHs
-  ask transformers with [level = "low"] [set capacity (Total-capacity * sum [base_demand] of HHs with [out-power-line-neighbor? myself] / total_demand )]
-  ask transformers with [level = "medium"] [set capacity sum [capacity] of transformers with [out-power-line-neighbor? myself]]
-  ask transformers with [level = "high"] [set capacity sum [capacity] of transformers with [out-power-line-neighbor? myself]]
+  ;Distrubute demand to households
+  let HHBegin 400 ;; the average energy use of a household in 2014 that does not change during runtime
+  ask HHs [set HHAverage random-normal HHBegin 50  set HHPeak HHAverage * HHFactor]
+  
+  ;Distribute capacity to low voltage lines
+  ask Transformers with [level = "LVline"] [
+    let HHPeakIn sum [HHPeak] of in-power-line-neighbors
+    set Capacity round (NHFactor * LVFactor * HHPeakIn)
+    ]
+  
+  ;Distribute capacity to low voltage transformers
+  ask Transformers with [level = "LVtransformer"][
+    let HHPeakIn 0
+    ask in-power-line-neighbors [set HHPeakIn HHPeakIn + sum [HHPeak] of in-power-line-neighbors]
+    set Capacity round (NHFactor * TFFactor * HHPeakIn)]
+  
+  ;Distribute capacity to neighbourhood transformer
+  ask Transformers with [level = "NHtransformer"][
+    set Capacity round (NHFactor * (sum [HHPeak] of HHs))
+  ]
+
+ 
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -186,7 +223,7 @@ average-number-friendships
 average-number-friendships
 0
 60
-13
+9
 1
 1
 NIL
@@ -212,7 +249,7 @@ size-of-area-influence
 size-of-area-influence
 0
 60
-18
+0
 6
 1
 patches
@@ -227,7 +264,7 @@ user-area-impact
 user-area-impact
 0
 0.1
-0.1
+0.03
 0.005
 1
 NIL
@@ -242,7 +279,7 @@ impact-on-friendships
 impact-on-friendships
 0
 0.1
-0
+0.03
 0.01
 1
 NIL
@@ -257,21 +294,11 @@ initial-EVs
 initial-EVs
 0
 100
-38
+20
 1
 1
 NIL
 HORIZONTAL
-
-CHOOSER
-10
-269
-160
-314
-neighbourhood-income
-neighbourhood-income
-"High" "Medium" "Low"
-2
 
 PLOT
 10
@@ -281,45 +308,113 @@ PLOT
 income disparity histogram
 income value
 number
-15.0
-110.0
+0.0
+120.0
 0.0
 50.0
 true
 false
 "" ""
 PENS
-"default" 5.0 1 -16777216 true "" "histogram [income] of users"
+"default" 5.0 1 -16777216 true "" "histogram [Income] of users"
 
 SLIDER
-171
-482
-346
-515
-Total-capacity
-Total-capacity
-2000
-80000
-67813
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
+-3
+340
 169
-515
-370
-548
-Mean-Base-Demand
-Mean-Base-Demand
-1
-20
-4
-1
+373
+NHFactor
+NHFactor
+1.1
+1.6
+1.4
+0.1
 1
 NIL
 HORIZONTAL
+
+SLIDER
+-2
+409
+170
+442
+LVFactor
+LVFactor
+0.5
+2.5
+1.1
+0.1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+0
+373
+172
+406
+TFFactor
+TFFactor
+0.5
+2.5
+1.1
+0.1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+-2
+446
+170
+479
+NHRichFactor
+NHRichFactor
+0.4
+3
+1
+0.1
+1
+NIL
+HORIZONTAL
+
+PLOT
+9
+792
+384
+1029
+Capacity 
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "plot sum [Capacity] of Transformers" "plot sum [Capacity] of Transformers"
+"pen-1" 1.0 0 -7500403 true "plot sum [Overcapacity] of Transformers" "plot sum [Overcapacity] of Transformers"
+
+PLOT
+10
+1035
+387
+1261
+Household demand
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot sum [HHAverage] of HHs"
+"pen-1" 1.0 0 -7500403 true "" "plot sum [HHPeak] of HHs"
 
 @#$#@#$#@
 ## WHAT IS IT?

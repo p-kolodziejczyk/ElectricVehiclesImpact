@@ -1,15 +1,24 @@
 breed [EVs EV]
 breed [HHs HH]
-breed [transformers transformer]
-breed [users user]
+breed [Transformers Transformer]
+breed [Users User]
 undirected-link-breed [friendships friendship]
 directed-link-breed [power-lines power-line]
 directed-link-breed [associations association] 
 
+transformers-own [Capacity Overcapacity Level Demand]
+EVs-own [EVPeak BatteryCapacity Power Range]
+HHS-own [HHAverage HHPeak]
+users-own [Preference InfluenceRange RangeMin IncSource Income]
 
-transformers-own [capacity level demand]
-EVs-own [Battery_capacity power range]
-HHS-own [demand base_demand]
-users-own [preference influence_range range_min income]
+power-lines-own [LineCapacity]
 
-power-lines-own [line-capacity]
+globals [HHGrowMonthly EconGrow HHFactor]
+
+to set-global-values
+set HHGrowMonthly 1.0014 ;; the growth factor of average energy use of a household from 2014 on (excluding EV’s) (1,0014)^12 = 1.017
+set EconGrow 1.02 ; Expected economic growth
+set HHFactor 3 ;a fixed factor based on experience that indicates what the average peak power will be
+
+
+end
