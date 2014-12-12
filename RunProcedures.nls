@@ -1,14 +1,16 @@
 to update-friendship-impact ;Observer
-  ask Users with [not any? in-association-neighbors][ask friendship-neighbors [set Preference Preference * (1 - impact-on-friendships / 100) if Preference < 0 [set Preference 0]]]
-  ask Users with [any? in-association-neighbors][ask friendship-neighbors [set Preference Preference * (1 + impact-on-friendships) if Preference > 1 [set Preference 1]]] 
+  ask Users with [not any? in-association-neighbors][ask friendship-neighbors [set Preference Preference * (1 - impact-on-friendships / 10) if Preference < 0 [set Preference 0]]]
+  ;Users without an EV decrease the Preference of their friends by 10% of imapct-on-friendships factor
+  ask Users with [any? in-association-neighbors][ask friendship-neighbors [set Preference Preference * (1 + impact-on-friendships) if Preference > 1 [set Preference 1]]]
+  ;Users with an EV increase the Preference of their friends by impact-on-friendhsips factor
 end
 
 to update-area-user-impact ;Observer
-  ask Users with [any? in-association-neighbors][
+  ask Users with [any? in-association-neighbors][   ;Users with EVs
     let i 0
-    while [i <= size-of-area-influence / 6][
-      ask other Users in-radius (6 * i) with [distance myself > (6 * (i - 1))][
-          set Preference Preference * (1 + user-area-impact / i) if Preference > 1 [set Preference 1] set label precision Preference 2]
+    while [i <= size-of-area-influence / 6][ ;affect all other users within size-of-area-influence radius
+      ask other Users in-radius (6 * i) with [distance myself > (6 * (i - 1))][ ;dividing this area into rings of 6 wide
+          set Preference Preference * (1 + user-area-impact / i) if Preference > 1 [set Preference 1] set label precision Preference 2] ;and increasing Preference of people by user-area-impact but inversly proportionally to distance
       set i i + 1     
       ]
   ]
@@ -24,25 +26,25 @@ to update-monthly
  ask HHs [set HHAverage HHAverage * HHGrowMonthly set HHPeak HHFactor * HHAverage ] ; update power demand of households
 end
 
-to-report coin-factor
-  
+to-report coin-factor 
+  ;procedure reporting conincidence factor to be updated
   report 1
 end
 
-to determine-used-capacity
-  ask Transformers with [level = "NHtransformer"][    ;NH
-    ask in-power-line-neighbors [
-      ask in-power-line-neighbors [
-       set Overcapacity Capacity - sum [HHPeak] of in-power-line-neighbors
+to determine-used-capacity ;observer 
+  ask Transformers with [level = "NHtransformer"][    ;ask highest level transformer
+    ask in-power-line-neighbors [ ;to ask lower level transformers
+      ask in-power-line-neighbors [ ;to ask power their power lines
+       set Overcapacity Capacity - sum [HHPeak] of in-power-line-neighbors ;calculate your overcapacity from households
         let aux 0
-        ask in-power-line-neighbors [let LVCoin coin-factor set aux (LVCoin * sum [EVPeak] of in-association-neighbors with [is-turtle? "EV"])]
+        ask in-power-line-neighbors [let LVCoin coin-factor set aux (LVCoin * sum [EVPeak] of in-association-neighbors with [is-turtle? "EV"])] ;decrease overcapacity based on impact from EVs
         set Overcapacity Overcapacity - aux
       ]
       let TFCoin coin-factor
-      set Overcapacity Capacity - TFCoin * (sum [Capacity - Overcapacity] of in-power-line-neighbors)
+      set Overcapacity Capacity - TFCoin * (sum [Capacity - Overcapacity] of in-power-line-neighbors) ;calculate overcapacity of LV transformers
     ]
   let NHCoin coin-factor
-  set Overcapacity Capacity - NHCoin * (sum [Capacity - Overcapacity] of in-power-line-neighbors)
+  set Overcapacity Capacity - NHCoin * (sum [Capacity - Overcapacity] of in-power-line-neighbors) ;calculate overcapacity of the highest level transformer
   ]
-  ask Transformers [ if Overcapacity < 0 [set color red]]
+  ask Transformers [ if Overcapacity < 0 [set color red]] ;if any fuse was blown, change color to red
 end

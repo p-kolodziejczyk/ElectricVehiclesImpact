@@ -7,18 +7,14 @@ directed-link-breed [power-lines power-line]
 directed-link-breed [associations association] 
 
 transformers-own [Capacity Overcapacity Level Demand]
-EVs-own [EVPeak BatteryCapacity Power Range]
+EVs-own [EVPeak BatteryCapacity]
 HHS-own [HHAverage HHPeak]
-users-own [Preference InfluenceRange RangeMin IncSource Income]
-
-power-lines-own [LineCapacity]
+users-own [Preference IncSource Income]
 
 globals [HHGrowMonthly EconGrow HHFactor]
 
-to set-global-values
+to set-global-values ;setting values needs to be embedded within a function
 set HHGrowMonthly 1.0014 ;; the growth factor of average energy use of a household from 2014 on (excluding EV’s) (1,0014)^12 = 1.017
 set EconGrow 1.02 ; Expected economic growth
 set HHFactor 3 ;a fixed factor based on experience that indicates what the average peak power will be
-
-
 end

@@ -27,29 +27,28 @@ end
 to setup-neighbourhoods
   set-default-shape Transformers "Flag"
   set-default-shape Users "person"
-  create-Transformers 1 [set level "NHtransformer" set color blue set size 20 set xcor round (min-pxcor + max-pxcor / 32)]
-  ask Transformers [hatch (6 + random 3) [set level "LVtransformer" set size 10  create-power-line-to myself [set thickness 1] set xcor round (xcor + max-pxcor / 14)]]
+  create-Transformers 1 [set level "NHtransformer" set color blue set size 20 set xcor round (min-pxcor + max-pxcor / 32)] ;create highest level transformer and assign it coordinates
+  ask Transformers [hatch (6 + random 3) [set level "LVtransformer" set size 10  create-power-line-to myself [set thickness 1] set xcor round (xcor + max-pxcor / 14)]] ;create 6-8 lower level transformers and assign them X coorditanes, connecting to higher level one
   ask patches [set pcolor green]
   let aux 0
-  ask Transformers with [level = "LVtransformer"][set ycor round (max-pycor - max-pycor / 7 - (aux * round (max-pycor / 4.1))) set aux aux + 1 ]
-  ask Transformers with [level = "LVtransformer"][set aux 0 hatch (2 + random 2) [set level "LVline" set size 5 create-power-line-to myself [set thickness 0.5] set xcor round (xcor + max-pxcor / 12) set ycor round (ycor + 12 - aux * 12) set aux aux + 1]]
+  ask Transformers with [level = "LVtransformer"][set ycor round (max-pycor - max-pycor / 7 - (aux * round (max-pycor / 4.1))) set aux aux + 1 ] ; Assign Y coordinates to LV transformers
+  ask Transformers with [level = "LVtransformer"][set aux 0 hatch (2 + random 2) [set level "LVline" set size 5 create-power-line-to myself [set thickness 0.5] set xcor round (xcor + max-pxcor / 12) set ycor round (ycor + 12 - aux * 12) set aux aux + 1]] ;Each of LV transformers creates 2-3 power lines, which are also given coordinates and directed connection
   ask Transformers with [level = "LVline"][
-    ask patches with [pycor = [ycor] of myself AND pxcor > [xcor] of myself][set pcolor blue]
-    set aux 0.9 hatch-HHs round ((21 / count Transformers with [level = "LVline"]) * (65 + random-poisson 22))[set shape "house" set color brown set size 3 create-power-line-to myself [hide-link]
-    set xcor xcor + round (aux) * 6 
-    ifelse (remainder (aux + 0.1) 1 = 0 ) [set ycor ycor + 4][set ycor ycor - 2] set aux aux + 0.5]
+    ask patches with [pycor = [ycor] of myself AND pxcor > [xcor] of myself][set pcolor blue]  ;color patches to imitate road
+    set aux 0.9 hatch-HHs round ((21 / count Transformers with [level = "LVline"]) * (65 + random-poisson 22))[set shape "house" set color brown set size 3 create-power-line-to myself [hide-link] ;Make power lines create households proportionally to the number of lines so that the total is around 1800, make direct link
+    set xcor xcor + round (aux) * 6  ;assign X coordinate to them
+    ifelse (remainder (aux + 0.1) 1 = 0 ) [set ycor ycor + 4][set ycor ycor - 2] set aux aux + 0.5] ; assign Y coordinates to them on both sides of the road
   ]
-  ask HHs [hatch-Users 1 [set xcor xcor + 2 set color black create-association-to myself [hide-link]]]
-  ask Transformers [set demand 0]
+  ask HHs [hatch-Users 1 [set xcor xcor + 2 set color black create-association-to myself [hide-link]]]; create users for each household and connect them
 end
 
-to setup-social-circle
+to setup-social-circle; observer
     ask Users [
-    create-friendships-with Users with [self > myself and random-float count Users < average-number-friendships][hide-link]]
-    ask Users [set Preference random-float 1.0]
+    create-friendships-with Users with [self > myself and random-float count Users < average-number-friendships][hide-link]] ;create friendships among users so that their average amount to average-number-friendhsips 
+    ask Users [set Preference random-float 1.0] ;give them initial value of preference
 end
 
-to setup-EVs
+to setup-EVs ; observer to be completed
   set-default-shape EVs "car"
   ask n-of initial-EVs Users [hatch-EVs 1 [set color blue set ycor ycor - 3 create-association-to myself create-associations-to [out-link-neighbors] of myself]]
   
@@ -57,53 +56,31 @@ end
 
 
 to distribute-income
-ask users [
-  let RSource random 100
-  let RIncome 1 + random 10
-  let Multiplier 1
-  Ifelse RSource <= (12 * NHRichFactor) [set IncSource 0 set Multiplier 1.3][
-    Ifelse RSource <= (12 + (36 / NHRichFactor)) [set IncSource 1][
-      set IncSource 2 set Multiplier 1.15]]
-  
-  ifelse RIncome = 1 
-    [set Income 8 * NHRichFactor * Multiplier][
-      ifelse RIncome = 2 
-        [set Income 13 * NHRichFactor * Multiplier][
-          ifelse RIncome = 3 
-            [set Income 17 * NHRichFactor * Multiplier][
-              ifelse RIncome = 4 
-                 [set Income 18 * NHRichFactor * Multiplier][
-                   ifelse RIncome = 5 
-                     [set Income 20 * NHRichFactor * Multiplier][
-                       ifelse RIncome = 6 
-                         [set Income 22 * NHRichFactor * Multiplier][
-                           ifelse RIncome = 7 
-                             [set Income 24 * NHRichFactor * Multiplier][
-                               ifelse RIncome = 8 
-                                 [set Income 28 * NHRichFactor * Multiplier][
-                                   ifelse RIncome = 9 
-                                     [set Income 33 * NHRichFactor * Multiplier]
-                                     [set Income 58 * NHRichFactor * Multiplier]
-                                 ]
-                             ]
-                         ]
-                     ]
-                 ]
-            ]
-        ]
-    ]
-    
-]  
-  
-  
-  
+let alpha 484 / 114 ;set distribution parameter 
+let lambda 1 / (114 / 22) ; mean - 22 and variance 114
+ask n-of 10 users [set Income round(income-source * random-gamma alpha lambda)]  ;assign Income to 10 random users 
+while [ any? users with [ Income = 0 ]] [ ; while there are any users with no income
+  ask users with [ income != 0 ] [  ;ask users that already have income
+      set alpha Income * Income / 22 ;assign mean of the distribution to their income,  swap previous variance with mean
+      set lambda 1 / (22 / Income) ;recalculate distribution paremeters
+      ask other users in-radius 6 with [ income = 0 ][set Income round(income-source * random-gamma alpha lambda)] ; assign randomized income to closest neighbours
+      if any? users in-radius 30 with [ income = 0 ][ask one-of users in-radius 30 with [ income = 0 ][set Income round(income-source * random-gamma alpha lambda)]] ;and one random user further on
+  ]
+]
+end
 
+;procedure added not to repear same code multiple times
+to-report income-source ;user 
+ let RSource random 100 
+  Ifelse RSource <= (12 * NHRichFactor) [set IncSource 2 report 1.3][  ;set person as self-employed, return income multiplier
+    Ifelse RSource <= (12 + (36 / NHRichFactor)) [set IncSource 0 report 1][ ;set person as unemployed/retired etc., return income multiplier
+      set IncSource 1 report 1.15]] ;set user as employed, return income multiplier
 end
 
 to distribute-demand-capacity
   ;Distrubute demand to households
   let HHBegin 400 ;; the average energy use of a household in 2014 that does not change during runtime
-  ask HHs [set HHAverage random-normal HHBegin 50  set HHPeak HHAverage * HHFactor]
+  ask HHs [set HHAverage random-normal HHBegin 50  set HHPeak HHAverage * HHFactor] ;set average peak energy use for all households with std. deviation of 50 
   
   ;Distribute capacity to low voltage lines
   ask Transformers with [level = "LVline"] [
@@ -223,7 +200,7 @@ average-number-friendships
 average-number-friendships
 0
 60
-9
+24
 1
 1
 NIL
@@ -249,7 +226,7 @@ size-of-area-influence
 size-of-area-influence
 0
 60
-0
+42
 6
 1
 patches
@@ -279,7 +256,7 @@ impact-on-friendships
 impact-on-friendships
 0
 0.1
-0.03
+0.1
 0.01
 1
 NIL
@@ -294,7 +271,7 @@ initial-EVs
 initial-EVs
 0
 100
-20
+16
 1
 1
 NIL
@@ -309,7 +286,7 @@ income disparity histogram
 income value
 number
 0.0
-120.0
+250.0
 0.0
 50.0
 true
@@ -327,7 +304,7 @@ NHFactor
 NHFactor
 1.1
 1.6
-1.4
+1.5
 0.1
 1
 NIL
