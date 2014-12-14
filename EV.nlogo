@@ -7,8 +7,8 @@ to setup-square ;observer
   set-global-values
   setup-neighbourhoods
   setup-social-circle
-  ;setup-EVs
   distribute-income
+  setup-EVs
   distribute-demand-capacity
   update-plots
 end
@@ -50,8 +50,13 @@ end
 
 to setup-EVs ; observer to be completed
   set-default-shape EVs "car"
-  ask n-of initial-EVs Users [hatch-EVs 1 [set color blue set ycor ycor - 3 create-association-to myself create-associations-to [out-link-neighbors] of myself]]
-  
+  let AverageIncome (sum [Income] of users / count users)
+  ask users [If ( random-normal ( 0.7 * Income / AverageIncome ) 1.5 > 0)[ hatch-EVs 1 [set ycor ycor - 3 create-association-to myself create-associations-to [out-link-neighbors] of myself]]]  
+  ask users with [any? in-association-neighbors][
+    Ifelse random-normal (0.7 * Income / AverageIncome ) 2 > 0
+    [ ask in-association-neighbors [Ifelse random-float 1 > 0.7 [ set CarOwnership 2 set CarAge random-normal 2 2 set color violet] [set CarOwnership 1 set CarAge random-normal 2 2 set color magenta] ]] ;; check company car or lease
+    [ ask in-association-neighbors [set CarOwnership 0 set CarAge random-normal 3 3 set color cyan]] ;; set car as private car
+    ]
 end
 
 
@@ -72,9 +77,9 @@ end
 ;procedure added not to repear same code multiple times
 to-report income-source ;user 
  let RSource random 100 
-  Ifelse RSource <= (12 * NHRichFactor) [set IncSource 2 report 1.3][  ;set person as self-employed, return income multiplier
-    Ifelse RSource <= (12 + (36 / NHRichFactor)) [set IncSource 0 report 1][ ;set person as unemployed/retired etc., return income multiplier
-      set IncSource 1 report 1.15]] ;set user as employed, return income multiplier
+  Ifelse RSource <= (12 * NHRichFactor) [set IncSource 2  set color yellow report 1.3][  ;set person as self-employed, return income multiplier
+    Ifelse RSource <= (12 + (36 / NHRichFactor)) [set IncSource 0  set color lime report 1][ ;set person as unemployed/retired etc., return income multiplier
+      set IncSource 1  report 1.15]] ;set user as employed, return income multiplier
 end
 
 to distribute-demand-capacity
@@ -207,10 +212,10 @@ NIL
 HORIZONTAL
 
 MONITOR
-277
-119
-385
-164
+280
+192
+388
+237
 NIL
 count friendships
 17
@@ -226,7 +231,7 @@ size-of-area-influence
 size-of-area-influence
 0
 60
-42
+30
 6
 1
 patches
@@ -241,7 +246,7 @@ user-area-impact
 user-area-impact
 0
 0.1
-0.03
+0.025
 0.005
 1
 NIL
@@ -256,7 +261,7 @@ impact-on-friendships
 impact-on-friendships
 0
 0.1
-0.1
+0.05
 0.01
 1
 NIL
@@ -271,7 +276,7 @@ initial-EVs
 initial-EVs
 0
 100
-16
+1
 1
 1
 NIL
@@ -304,7 +309,7 @@ NHFactor
 NHFactor
 1.1
 1.6
-1.5
+1.6
 0.1
 1
 NIL
@@ -392,6 +397,56 @@ false
 PENS
 "default" 1.0 0 -16777216 true "" "plot sum [HHAverage] of HHs"
 "pen-1" 1.0 0 -7500403 true "" "plot sum [HHPeak] of HHs"
+"pen-2" 1.0 0 -2674135 true "" "plot sum [BatteryCapacity] of EVs"
+
+MONITOR
+310
+65
+377
+110
+NIL
+count EVs
+17
+1
+11
+
+PLOT
+411
+1073
+846
+1273
+Car Ownership
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+true
+"" ""
+PENS
+"Own Car" 1.0 0 -11221820 true "" "plot count EVs with [CarOwnership = 0]"
+"Lease Car" 1.0 0 -5825686 true "" "plot count EVs with [CarOwnership = 1]"
+"Company Car" 1.0 0 -8630108 true "" "plot count EVs with [CarOwnership = 2]"
+
+PLOT
+850
+1072
+1010
+1272
+Income source distribution
+NIL
+NIL
+0.0
+3.0
+0.0
+1000.0
+true
+false
+"" ""
+PENS
+"default" 1.0 1 -16777216 true "" "histogram [IncSource] of users"
 
 @#$#@#$#@
 ## WHAT IS IT?
