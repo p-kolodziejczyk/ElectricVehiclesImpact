@@ -39,7 +39,7 @@ to setup-neighbourhoods
     set xcor xcor + round (aux) * 6  ;assign X coordinate to them
     ifelse (remainder (aux + 0.1) 1 = 0 ) [set ycor ycor + 4][set ycor ycor - 2] set aux aux + 0.5] ; assign Y coordinates to them on both sides of the road
   ]
-  ask HHs [hatch-Users 1 [set xcor xcor + 2 set color black create-association-to myself [hide-link]]]; create users for each household and connect them
+  ask HHs [hatch-Users 1 [set xcor xcor + 2 set color black create-association-to myself]]; create users for each household and connect them
 end
 
 to setup-social-circle; observer
@@ -48,14 +48,51 @@ to setup-social-circle; observer
     ask Users [set Preference random-float 1.0] ;give them initial value of preference
 end
 
-to setup-EVs ; observer to be completed
+to setup-EVs ; observer
   set-default-shape EVs "car"
   let AverageIncome (sum [Income] of users / count users)
   ask users [If ( random-normal ( 0.7 * Income / AverageIncome ) 1.5 > 0)[ hatch-EVs 1 [set ycor ycor - 3 create-association-to myself create-associations-to [out-link-neighbors] of myself]]]  
-  ask users with [any? in-association-neighbors][
-    Ifelse random-normal (0.7 * Income / AverageIncome ) 2 > 0
-    [ ask in-association-neighbors [Ifelse random-float 1 > 0.7 [ set CarOwnership 2 set CarAge random-normal 2 2 set color violet] [set CarOwnership 1 set CarAge random-normal 2 2 set color magenta] ]] ;; check company car or lease
-    [ ask in-association-neighbors [set CarOwnership 0 set CarAge random-normal 3 3 set color cyan]] ;; set car as private car
+  ask users with [any? in-association-neighbors]
+  [
+    let prob_private 0
+    let prob_lease 0
+    ifelse IncSource = 0
+    [
+      set prob_private 0.8
+      set prob_lease 0.15 
+    ]
+    [
+      ifelse IncSource = 1
+      [
+        set prob_private 0.5
+        set prob_lease 0.4   
+      ]
+      [
+      set prob_private 0.2
+      set prob_lease 0.1 
+      ]
+    ]
+determine-ownership-type prob_private prob_lease
+  ]    
+end    
+ 
+    
+to determine-ownership-type [private lease] ;user    
+    Ifelse random-float 1 > private
+    [ 
+      ask in-association-neighbors 
+      [
+        Ifelse random-float 1 > (lease / (1 - private))
+        [
+          set CarOwnership 2 set CarAge random-normal 2 2 set color violet
+        ]
+        [
+          set CarOwnership 1 set CarAge random-normal 2 2 set color magenta
+        ]
+      ]
+    ] ;; check company car or lease
+    [ 
+      ask in-association-neighbors [set CarOwnership 0 set CarAge random-normal 3 3 set color cyan] ;; set car as private car
     ]
 end
 
@@ -205,7 +242,7 @@ average-number-friendships
 average-number-friendships
 0
 60
-24
+38
 1
 1
 NIL
@@ -231,7 +268,7 @@ size-of-area-influence
 size-of-area-influence
 0
 60
-30
+12
 6
 1
 patches
@@ -246,7 +283,7 @@ user-area-impact
 user-area-impact
 0
 0.1
-0.025
+0.03
 0.005
 1
 NIL
@@ -261,23 +298,8 @@ impact-on-friendships
 impact-on-friendships
 0
 0.1
-0.05
+0.03
 0.01
-1
-NIL
-HORIZONTAL
-
-SLIDER
-10
-232
-182
-265
-initial-EVs
-initial-EVs
-0
-100
-1
-1
 1
 NIL
 HORIZONTAL
@@ -309,7 +331,7 @@ NHFactor
 NHFactor
 1.1
 1.6
-1.6
+1.4
 0.1
 1
 NIL
@@ -339,7 +361,7 @@ TFFactor
 TFFactor
 0.5
 2.5
-1.1
+1.7
 0.1
 1
 NIL
@@ -404,7 +426,7 @@ MONITOR
 65
 377
 110
-NIL
+cars
 count EVs
 17
 1
@@ -433,7 +455,7 @@ PENS
 PLOT
 850
 1072
-1010
+1102
 1272
 Income source distribution
 NIL
@@ -443,10 +465,23 @@ NIL
 0.0
 1000.0
 true
-false
+true
 "" ""
 PENS
-"default" 1.0 1 -16777216 true "" "histogram [IncSource] of users"
+"Unemployed/retired" 1.0 0 -13840069 true "" "plot count users with [IncSource = 0]"
+"Employed" 1.0 0 -16777216 true "" "plot count users with [IncSource = 1]"
+"Self-employed" 1.0 0 -1184463 true "" "plot count users with [IncSource = 2]"
+
+MONITOR
+310
+113
+377
+158
+EVs
+count EVs with [BatteryCapacity > 0]
+17
+1
+11
 
 @#$#@#$#@
 ## WHAT IS IT?

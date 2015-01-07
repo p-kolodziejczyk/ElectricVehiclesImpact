@@ -16,6 +16,5 @@ globals [HHGrowMonthly EconGrow HHFactor]
 to set-global-values ;setting values needs to be embedded within a function
 set HHGrowMonthly 1.0014 ;; the growth factor of average energy use of a household from 2014 on (excluding EV’s) (1,0014)^12 = 1.017
 set EconGrow 1.02 ; Expected economic growth
-set HHFactor 3 ;a fixed factor based on experience that indicates what the average peak power will be
-
+set HHFactor 3 ;a fixed factor based on experience that indicates what the average peak power will be 
 end

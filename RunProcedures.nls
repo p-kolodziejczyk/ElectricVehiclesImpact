@@ -10,7 +10,7 @@ to update-area-user-impact ;Observer
     let i 0
     while [i <= size-of-area-influence / 6][ ;affect all other users within size-of-area-influence radius
       ask other Users in-radius (6 * i) with [distance myself > (6 * (i - 1))][ ;dividing this area into rings of 6 wide
-          set Preference Preference * (1 + user-area-impact / i) if Preference > 1 [set Preference 1] set label precision Preference 2] ;and increasing Preference of people by user-area-impact but inversly proportionally to distance
+          set Preference Preference * (1 + user-area-impact / i) if Preference > 1 [set Preference 1]] ;and increasing Preference of people by user-area-impact but inversly proportionally to distance
       set i i + 1     
       ]
   ]
@@ -26,25 +26,51 @@ to update-monthly
  ask HHs [set HHAverage HHAverage * HHGrowMonthly set HHPeak HHFactor * HHAverage ] ; update power demand of households
 end
 
-to-report coin-factor 
-  ;procedure reporting conincidence factor to be updated
-  report 1
+to-report coin-factor [NumberEVs]
+  let a 0.1
+  let b 0.6
+  report (b + (1 - b)*(1 + exp(a))/(1 + exp(a * NumberEVs)))
 end
 
 to determine-used-capacity ;observer 
-  ask Transformers with [level = "NHtransformer"][    ;ask highest level transformer
-    ask in-power-line-neighbors [ ;to ask lower level transformers
-      ask in-power-line-neighbors [ ;to ask power their power lines
-       set Overcapacity Capacity - sum [HHPeak] of in-power-line-neighbors ;calculate your overcapacity from households
-        let aux 0
-        ask in-power-line-neighbors [let LVCoin coin-factor set aux (LVCoin * sum [EVPeak] of in-association-neighbors with [is-turtle? "EV"])] ;decrease overcapacity based on impact from EVs
-        set Overcapacity Overcapacity - aux
+  ask Transformers with [level = "NHtransformer"]  ;ask highest level transformer
+  [   
+    ask in-power-line-neighbors  ;to ask LV transformers
+    [
+      let numTF 0 ;number of EVs connected to given LV transformer
+      let HHPeakTF 0; peak capacity of all houses connected to LV transformer
+      let EVPowerTF 0; power consumption of all EVs connected to LV transformer
+      ask in-power-line-neighbors ;to ask their power lines
+      [
+        let numLV 0 ;number of EVs connected to given LV line
+        let HHPeakLV sum [HHPeak] of in-power-line-neighbors
+        let EVPowerLV 0;
+        set Overcapacity Capacity - HHPeakLV ;calculate your overcapacity from households
+        ask in-power-line-neighbors [set numLV numLV + count in-association-neighbors with [breed = EVs AND BatteryCapacity > 0] set EVPowerLV EVPowerLV + sum [EVPeak] of in-association-neighbors with [breed = EVs]]
+        set numTF numTF + numLV
+        if numLV > 0 
+          [
+            show [who] of self
+            let LVCoin coin-factor numLV
+            set Overcapacity Overcapacity - (LVCoin * EVPowerLV) ;decrease overcapacity based on impact from EVs
+            set EVpowerTF EVpowerTF + EVPowerLV
+          ]
+       set HHPeakTF HHPeakTF + HHPeakLV ;calculate peak capacity of all households connected to this transformer   
       ]
-      let TFCoin coin-factor
-      set Overcapacity Capacity - TFCoin * (sum [Capacity - Overcapacity] of in-power-line-neighbors) ;calculate overcapacity of LV transformers
+      set Overcapacity Capacity - HHPeakTF ;calculate overcapacity from households
+      if numTF > 0
+      [
+        let TFCoin coin-factor numTF 
+        set Overcapacity Overcapacity - (TFCoin * EVPowerTF)
+      ]
     ]
-  let NHCoin coin-factor
-  set Overcapacity Capacity - NHCoin * (sum [Capacity - Overcapacity] of in-power-line-neighbors) ;calculate overcapacity of the highest level transformer
+  set Overcapacity Capacity - sum [HHPeak] of HHs  
+  if count EVs with [BatteryCapacity > 0] > 0
+  [
+    let NHCoin coin-factor count EVs with [BatteryCapacity > 0]
+    set Overcapacity Overcapacity - NHCoin * (sum [EVPeak] of EVs) ;calculate overcapacity of the highest level transformer
+    ]
   ]
+  
   ask Transformers [ if Overcapacity < 0 [set color red]] ;if any fuse was blown, change color to red
 end
