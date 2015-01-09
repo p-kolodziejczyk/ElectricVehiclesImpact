@@ -10,6 +10,7 @@ to setup-square ;observer
   distribute-income
   setup-EVs
   distribute-demand-capacity
+  set-travel-parameters
   update-plots
 end
 
@@ -18,6 +19,7 @@ to go ;observer
   update-area-user-impact
   update-friendship-impact
   update-monthly
+  go-traveling
   if (remainder ticks 12 = 0) [update-yearly]
   tick  
 end
@@ -141,7 +143,29 @@ to distribute-demand-capacity
     set Capacity round (NHFactor * (sum [HHPeak] of HHs))
   ]
 
+end
+
+to set-travel-parameters ;; inits the parameter that define the travel patterns of the user
+  ask users with [any? in-association-neighbors][
+    set trip_memory [] ;; init memory to an empty list
+    set commute_probability random-normal 0.8 0.1  ;; set the commute probability 
+    ;;next two lines to check that the probability still stays between 5 and 100%
+    if (commute_probability > 1) [set commute_probability 1] 
+    if (commute_probability < 0.05) [set commute_probability  0.05]
+    
+    ;; set the average commute distance of the user with a lower bound of 5km
+    set commute_average  random-normal 40 10
+    if (commute_average < 5) [set commute_average 5]
  
+    ;;set the probability of going on a longer trip. can only stay in a range of 0-100%
+    set long_dist_probability random-normal 0.2 0.1 
+    if (long_dist_probability < 0) [set long_dist_probability 0]
+    if (long_dist_probability > 1) [set long_dist_probability 1]
+    
+    ;; set the average distance traveled when going on a non commuting trip with a lower bound 10km
+    set long_dist random-normal 100 50
+    if (long_dist < 10) [set long_dist 10]
+    ]
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -242,7 +266,7 @@ average-number-friendships
 average-number-friendships
 0
 60
-38
+52
 1
 1
 NIL
@@ -268,7 +292,7 @@ size-of-area-influence
 size-of-area-influence
 0
 60
-12
+42
 6
 1
 patches
@@ -283,7 +307,7 @@ user-area-impact
 user-area-impact
 0
 0.1
-0.03
+0.1
 0.005
 1
 NIL
@@ -298,7 +322,7 @@ impact-on-friendships
 impact-on-friendships
 0
 0.1
-0.03
+0.04
 0.01
 1
 NIL
@@ -331,7 +355,7 @@ NHFactor
 NHFactor
 1.1
 1.6
-1.4
+1.6
 0.1
 1
 NIL
@@ -361,7 +385,7 @@ TFFactor
 TFFactor
 0.5
 2.5
-1.7
+2.5
 0.1
 1
 NIL
