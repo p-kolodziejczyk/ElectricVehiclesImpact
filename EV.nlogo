@@ -11,6 +11,7 @@ to setup-square ;observer
   setup-EVs
   distribute-demand-capacity
   set-travel-parameters
+  repeat 24 [go-traveling]
   update-plots
 end
 
@@ -18,9 +19,8 @@ to go ;observer
   determine-used-capacity
   update-area-user-impact
   update-friendship-impact
+  consider-buying-car
   go-traveling  
-  if ticks = 12 [ask EVs [set CarAge CarAge - 12]] ; to build up travelling memory
-  if ticks >= 12 [consider-buying-car]
   update-monthly
   if (ticks > 0 AND remainder ticks 12 = 0) [update-yearly]
   tick  
