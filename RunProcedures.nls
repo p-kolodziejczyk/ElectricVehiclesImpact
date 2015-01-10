@@ -1,12 +1,14 @@
 to update-friendship-impact ;Observer
-  ask Users with [not any? in-association-neighbors][ask friendship-neighbors [set Preference Preference * (1 - impact-on-friendships / 10) if Preference < 0 [set Preference 0]]]
-  ;Users without an EV decrease the Preference of their friends by 10% of imapct-on-friendships factor
-  ask Users with [any? in-association-neighbors][ask friendship-neighbors [set Preference Preference * (1 + impact-on-friendships) if Preference > 1 [set Preference 1]]]
-  ;Users with an EV increase the Preference of their friends by impact-on-friendhsips factor
+  ask Users with [any? in-association-neighbors]
+  [
+  ifelse any? in-association-neighbors with [BatteryCapacity > 0]
+  [ask friendship-neighbors [set Preference Preference * (1 + impact-on-friendships) if Preference > 1 [set Preference 1]]]  ;Users with an EV increase the Preference of their friends by impact-on-friendhsips factor
+  [ask friendship-neighbors [set Preference Preference * (1 - impact-on-friendships / 10) if Preference < 0 [set Preference 0]]] ;Users without an EV decrease the Preference of their friends by 10% of imapct-on-friendships factor
+  ]
 end
 
 to update-area-user-impact ;Observer
-  ask Users with [any? in-association-neighbors][   ;Users with EVs
+  ask Users with [any? in-association-neighbors with [BatteryCapacity > 0]][   ;Users with EVs
     let i 0
     while [i <= size-of-area-influence / 6][ ;affect all other users within size-of-area-influence radius
       ask other Users in-radius (6 * i) with [distance myself > (6 * (i - 1))][ ;dividing this area into rings of 6 wide
@@ -24,6 +26,7 @@ end
 
 to update-monthly
  ask HHs [set HHAverage HHAverage * HHGrowMonthly set HHPeak HHFactor * HHAverage ] ; update power demand of households
+ ask EVs [set CarAge CarAge + 1]
 end
 
 to-report coin-factor [NumberEVs]
@@ -99,4 +102,22 @@ to go-traveling
       set trip_memory lput trip trip_memory ;; add the trip to the memory 
     ]
     ]
+end
+
+to consider-buying-car
+  ask users with [any? in-association-neighbors]
+  [
+    if any? in-association-neighbors with [CarOwnership = 0 AND CarAge + random-normal 0 3  > PrivateCarReplaceAge] ;ask those who own a private car
+    [
+    replace-car  
+    ]
+    if any? in-association-neighbors with [CarOwnership = 1 OR CarOwnership = 2 AND CarAge + random-normal 0 2  > NonPrivateCarReplaceAge] ;ask those who own a private car
+    [
+    replace-car  
+    ] 
+  ]
+end
+
+to replace-car
+  set label "Replace"
 end

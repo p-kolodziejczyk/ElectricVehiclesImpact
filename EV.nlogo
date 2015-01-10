@@ -18,9 +18,11 @@ to go ;observer
   determine-used-capacity
   update-area-user-impact
   update-friendship-impact
+  go-traveling  
+  if ticks = 12 [ask EVs [set CarAge CarAge - 12]] ; to build up travelling memory
+  if ticks >= 12 [consider-buying-car]
   update-monthly
-  go-traveling
-  if (remainder ticks 12 = 0) [update-yearly]
+  if (ticks > 0 AND remainder ticks 12 = 0) [update-yearly]
   tick  
 end
 
@@ -86,15 +88,15 @@ to determine-ownership-type [private lease] ;user
       [
         Ifelse random-float 1 > (lease / (1 - private))
         [
-          set CarOwnership 2 set CarAge random-normal 2 2 set color violet
+          set CarOwnership 2 set color violet set CarAge round (12 * random-normal 2 1) if CarAge < 0 [set CarAge 0]
         ]
         [
-          set CarOwnership 1 set CarAge random-normal 2 2 set color magenta
+          set CarOwnership 1  set color magenta set CarAge round (12 * random-normal 2 1) if CarAge < 0 [set CarAge 0]
         ]
       ]
     ] ;; check company car or lease
     [ 
-      ask in-association-neighbors [set CarOwnership 0 set CarAge random-normal 3 3 set color cyan] ;; set car as private car
+      ask in-association-neighbors [set CarOwnership 0 set color cyan set CarAge round (12 * random-normal 3 1.5) IF CarAge < 0 [set CarAge 0]] ;; set car as private car
     ]
 end
 
@@ -113,7 +115,7 @@ while [ any? users with [ Income = 0 ]] [ ; while there are any users with no in
 ]
 end
 
-;procedure added not to repear same code multiple times
+;procedure added not to repeat same code multiple times
 to-report income-source ;user 
  let RSource random 100 
   Ifelse RSource <= (12 * NHRichFactor) [set IncSource 2  set color yellow report 1.3][  ;set person as self-employed, return income multiplier
@@ -266,7 +268,7 @@ average-number-friendships
 average-number-friendships
 0
 60
-52
+24
 1
 1
 NIL
@@ -292,7 +294,7 @@ size-of-area-influence
 size-of-area-influence
 0
 60
-42
+24
 6
 1
 patches
@@ -307,7 +309,7 @@ user-area-impact
 user-area-impact
 0
 0.1
-0.1
+0.03
 0.005
 1
 NIL
@@ -322,7 +324,7 @@ impact-on-friendships
 impact-on-friendships
 0
 0.1
-0.04
+0
 0.01
 1
 NIL
@@ -355,7 +357,7 @@ NHFactor
 NHFactor
 1.1
 1.6
-1.6
+1.1
 0.1
 1
 NIL
@@ -385,7 +387,7 @@ TFFactor
 TFFactor
 0.5
 2.5
-2.5
+2
 0.1
 1
 NIL
@@ -400,7 +402,7 @@ NHRichFactor
 NHRichFactor
 0.4
 3
-1
+1.8
 0.1
 1
 NIL
