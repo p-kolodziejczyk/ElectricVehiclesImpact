@@ -109,15 +109,91 @@ to consider-buying-car
   [
     if any? in-association-neighbors with [CarOwnership = 0 AND CarAge + random-normal 0 3  > PrivateCarReplaceAge] ;ask those who own a private car
     [
-    replace-car  
+    replace-car self
     ]
     if any? in-association-neighbors with [CarOwnership = 1 OR CarOwnership = 2 AND CarAge + random-normal 0 2  > NonPrivateCarReplaceAge] ;ask those who own a private car
     [
-    replace-car  
+    replace-car  self
     ] 
   ]
 end
 
-to replace-car
+to replace-car [me]
+  let base_price (0.85 * Income)
+  let charge_power 10 ;; from wikipedia charging_station 2-3 hours charging time.
+  let batterysize best_battery(me)
+  let ev_travel_cost travel_cost me batterysize
+  let ic_travel_cost travel_cost me 0
+  let tax_advantage calc_tax me base_price 
+  let lifetime 1 ; simply to initialize the lifetime
+  ifelse any? in-association-neighbors with [CarOwnership = 0] [
+    set lifetime PrivateCarReplaceAge / 12]
+  [
+    set lifetime NonPrivateCarReplaceAge / 12]
+  let Cost_ev base_price + ev_travel_cost * lifetime - tax_advantage
+  let Cost_ic base_price + ic_travel_cost * lifetime
+  let carown [CarOwnership] of EVs with [in-association-neighbor? me]
+  ifelse preference_to_cost([Preference] of me) * Cost_ev < Cost_ic[
+     hatch-EVs 1 [
+       set CarOwnership carown
+       set ycor ycor - 3 create-association-to me create-associations-to [out-link-neighbors] of me
+       set CarAge 0
+       set BatteryCapacity batterysize
+       set EVPeak charge_power * ev_coincidence batterysize
+       ]
+     ask EVs with [in-association-neighbor? me] [ 
+     if CarAge > 0 [die]] ;; kill the old car 
+  ][
+   hatch-EVs 1 [
+       set CarOwnership carown
+       set ycor ycor - 3 create-association-to me create-associations-to [out-link-neighbors] of me
+       set CarAge 0
+       set BatteryCapacity 0
+       set EVPeak 0
+       ]
+   ask EVs with [in-association-neighbor? me] [
+     if CarAge > 0 [die]] ;; kill the old car 
+   ]
   set label "Replace"
 end
+
+to-report preference_to_cost [pref]
+  let a 4
+  report 1.3 - (0.4 * (1 + exp(- a))/(1 + exp(- a * pref)))
+end
+
+to-report ev_coincidence [batterycap]
+  let b 0.4
+  let a 0.1
+  report (b + (1 - b) * ((1) /(1 + exp(- a * batterycap))))
+end
+
+to-report best_battery [me]
+  let bat 5
+  let cost_old travel_cost me bat
+  let cost_new cost_old
+  while [cost_new <= cost_old][
+    set cost_old cost_new
+    set bat bat + 5 
+    set cost_new travel_cost me bat
+  ]
+  report (bat - 5)
+end
+
+to-report travel_cost[me  bat]
+  let cost 0 
+  let el_price 0.2 ;; here is a charge at home variable missing
+  let Price_gas 1.5 ;; just a guess of 1.5 euro per liter of 
+  let el_distance 0
+  let battery_price 350 
+  foreach [trip_memory] of me [
+    set el_distance (bat / 0.2 ) ;; calculates the distance traveled electrically
+    if el_distance > ? [set el_distance ?]
+    set cost cost + (? - el_distance) * 0.06 * Price_gas + el_distance * 0.2 * el_price
+  ]
+  set cost (cost / length trip_memory) * 720 ;; normalize on to one year
+  report cost + battery_price * bat
+end
+to-report calc_tax [me base_price]
+  report 4000 ;; for now just return 4000 euro tax advantage
+end 

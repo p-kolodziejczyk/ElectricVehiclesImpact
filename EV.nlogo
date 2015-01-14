@@ -309,7 +309,7 @@ user-area-impact
 user-area-impact
 0
 0.1
-0.03
+0
 0.005
 1
 NIL
