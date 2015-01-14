@@ -268,7 +268,7 @@ average-number-friendships
 average-number-friendships
 0
 60
-24
+37
 1
 1
 NIL
@@ -294,7 +294,7 @@ size-of-area-influence
 size-of-area-influence
 0
 60
-24
+60
 6
 1
 patches
@@ -309,7 +309,7 @@ user-area-impact
 user-area-impact
 0
 0.1
-0
+0.04
 0.005
 1
 NIL
@@ -324,7 +324,7 @@ impact-on-friendships
 impact-on-friendships
 0
 0.1
-0
+0.08
 0.01
 1
 NIL
@@ -387,7 +387,7 @@ TFFactor
 TFFactor
 0.5
 2.5
-2
+2.1
 0.1
 1
 NIL
@@ -445,7 +445,7 @@ false
 PENS
 "default" 1.0 0 -16777216 true "" "plot sum [HHAverage] of HHs"
 "pen-1" 1.0 0 -7500403 true "" "plot sum [HHPeak] of HHs"
-"pen-2" 1.0 0 -2674135 true "" "plot sum [BatteryCapacity] of EVs"
+"pen-2" 1.0 0 -2674135 true "" "plot sum [EVPeak] of EVs"
 
 MONITOR
 310
