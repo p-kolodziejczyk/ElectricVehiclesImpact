@@ -8,8 +8,8 @@ to setup-square ;observer
   setup-neighbourhoods
   setup-social-circle
   distribute-income
-  setup-EVs
   distribute-demand-capacity
+  setup-EVs
   set-travel-parameters
   repeat 24 [go-traveling]
   update-plots
@@ -54,7 +54,7 @@ end
 
 to setup-EVs ; observer
   set-default-shape EVs "car"
-  let AverageIncome (sum [Income] of users / count users)
+  let AverageIncome (sum [Income] of users / count users / NHRichFactor)
   ask users [If ( random-normal ( 0.7 * Income / AverageIncome ) 1.5 > 0)[ hatch-EVs 1 [set ycor ycor - 3 create-association-to myself create-associations-to [out-link-neighbors] of myself]]]  
   ask users with [any? in-association-neighbors]
   [
@@ -117,10 +117,10 @@ end
 
 ;procedure added not to repeat same code multiple times
 to-report income-source ;user 
- let RSource random 100 
-  Ifelse RSource <= (12 * NHRichFactor) [set IncSource 2  set color yellow report 1.3][  ;set person as self-employed, return income multiplier
-    Ifelse RSource <= (12 + (36 / NHRichFactor)) [set IncSource 0  set color lime report 1][ ;set person as unemployed/retired etc., return income multiplier
-      set IncSource 1  report 1.15]] ;set user as employed, return income multiplier
+ let RSource random 100
+ If RSource <= (12 + (36 / NHRichFactor)) [set IncSource 0  set color lime report 1];set person as unemployed/retired etc., return income multiplier 
+ If RSource >= (100 - 12 * NHRichFactor) [set IncSource 2  set color yellow report 1.3]  ;set person as self-employed, return income multiplier
+ set IncSource 1 set color black report 1.15 ;set user as employed, return income multiplier
 end
 
 to distribute-demand-capacity
@@ -268,7 +268,7 @@ average-number-friendships
 average-number-friendships
 0
 60
-37
+50
 1
 1
 NIL
@@ -309,7 +309,7 @@ user-area-impact
 user-area-impact
 0
 0.1
-0.04
+0.07
 0.005
 1
 NIL
@@ -357,7 +357,7 @@ NHFactor
 NHFactor
 1.1
 1.6
-1.1
+1.3
 0.1
 1
 NIL
@@ -372,7 +372,7 @@ LVFactor
 LVFactor
 0.5
 2.5
-1.1
+1.3
 0.1
 1
 NIL
@@ -387,7 +387,7 @@ TFFactor
 TFFactor
 0.5
 2.5
-2.1
+1.4
 0.1
 1
 NIL
@@ -402,7 +402,7 @@ NHRichFactor
 NHRichFactor
 0.4
 3
-1.8
+2.5
 0.1
 1
 NIL
@@ -481,13 +481,13 @@ PENS
 PLOT
 850
 1072
-1102
+1166
 1272
 Income source distribution
 NIL
 NIL
 0.0
-3.0
+1.0
 0.0
 1000.0
 true
