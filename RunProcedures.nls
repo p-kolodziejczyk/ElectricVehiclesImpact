@@ -53,7 +53,6 @@ to determine-used-capacity ;observer
         set numTF numTF + numLV
         if numLV > 0 
           [
-            show [who] of self
             let LVCoin coin-factor numLV
             set Overcapacity Overcapacity - (LVCoin * EVPowerLV) ;decrease overcapacity based on impact from EVs
             set EVpowerTF EVpowerTF + EVPowerLV
@@ -113,12 +112,12 @@ to consider-buying-car
     ]
     if any? in-association-neighbors with [CarOwnership = 1 OR CarOwnership = 2 AND CarAge + random-normal 0 2  > NonPrivateCarReplaceAge] ;ask those who own a private car
     [
-    replace-car  self
+    replace-car self
     ] 
   ]
 end
 
-to replace-car [me]
+to replace-car [me] ;@user
   let base_price (0.85 * Income)
   let charge_power 10000 ;; from wikipedia charging_station 2-3 hours charging time 10kW.
   let batterysize best_battery(me)
@@ -130,13 +129,14 @@ to replace-car [me]
     set lifetime PrivateCarReplaceAge / 12]
   [
     set lifetime NonPrivateCarReplaceAge / 12]
-  let Cost_ev base_price + ev_travel_cost * lifetime - tax_advantage
-  let Cost_ic base_price + ic_travel_cost * lifetime
+  let Cost_ev base_price + ev_travel_cost * lifetime - tax_advantage 
+  let Cost_ic base_price + ic_travel_cost * lifetime 
   let carown first  [CarOwnership] of [in-association-neighbors] of me
-  ifelse preference_to_cost([Preference] of me) * Cost_ev < Cost_ic[
+  ifelse preference_to_cost([Preference] of me) * Cost_ev < Cost_ic[ 
     ask [in-association-neighbors] of me [die] ;; kill the old car
      hatch-EVs 1 [
        set CarOwnership carown
+       ifelse CarOwnership = 0 [set color cyan][ ifelse CarOwnership = 1 [set color magenta] [set color violet ]]
        set ycor ycor - 3 create-association-to me create-associations-to [out-link-neighbors] of me
        set CarAge 0
        set BatteryCapacity batterysize
@@ -145,15 +145,15 @@ to replace-car [me]
       
   ][
   ask [in-association-neighbors] of me [die] ;; kill the old car
-   hatch-EVs 1 [
+   hatch-EVs 1 [ 
        set CarOwnership carown
+       ifelse CarOwnership = 0 [set color cyan][ ifelse CarOwnership = 1 [set color magenta] [set color violet ]]
        set ycor ycor - 3 create-association-to me create-associations-to [out-link-neighbors] of me
        set CarAge 0
        set BatteryCapacity 0
        set EVPeak 0
        ]
    ]
-  set label "Replace"
 end
 
 to-report preference_to_cost [pref]
@@ -172,8 +172,8 @@ to-report best_battery [me]
   let cost_old travel_cost me bat
   let cost_new cost_old
   while [cost_new <= cost_old][
-    set cost_old cost_new
-    set bat bat + 5 
+    set cost_old cost_new 
+    set bat bat + 5
     set cost_new travel_cost me bat
   ]
   report (bat - 5)

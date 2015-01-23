@@ -126,7 +126,7 @@ end
 to distribute-demand-capacity
   ;Distrubute demand to households
   let HHBegin 400 ;; the average energy use of a household in 2014 that does not change during runtime
-  ask HHs [set HHAverage random-normal HHBegin 50  set HHPeak HHAverage * HHFactor] ;set average peak energy use for all households with std. deviation of 50 
+  ask HHs [set HHAverage random-normal HHBegin 50  set HHPeak round (HHAverage * HHFactor)] ;set average peak energy use for all households with std. deviation of 50 
   
   ;Distribute capacity to low voltage lines
   ask Transformers with [level = "LVline"] [
@@ -268,7 +268,7 @@ average-number-friendships
 average-number-friendships
 0
 60
-50
+30
 1
 1
 NIL
@@ -294,7 +294,7 @@ size-of-area-influence
 size-of-area-influence
 0
 60
-60
+24
 6
 1
 patches
@@ -309,7 +309,7 @@ user-area-impact
 user-area-impact
 0
 0.1
-0.07
+0.025
 0.005
 1
 NIL
@@ -324,7 +324,7 @@ impact-on-friendships
 impact-on-friendships
 0
 0.1
-0.08
+0.02
 0.01
 1
 NIL
@@ -355,9 +355,9 @@ SLIDER
 373
 NHFactor
 NHFactor
-1.1
+1.0
 1.6
-1.3
+1.4
 0.1
 1
 NIL
@@ -402,7 +402,7 @@ NHRichFactor
 NHRichFactor
 0.4
 3
-2.5
+1.5
 0.1
 1
 NIL
@@ -467,9 +467,9 @@ Car Ownership
 NIL
 NIL
 0.0
-10.0
+1.0
 0.0
-10.0
+500.0
 true
 true
 "" ""
