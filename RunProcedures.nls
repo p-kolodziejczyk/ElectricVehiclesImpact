@@ -22,6 +22,7 @@ end
 
 to update-yearly
   ask Users [set Income Income * EconGrow] ; update income for users
+  set global_battery_price global_battery_price * (1 - battery_price_drop)
 end
 
 to update-monthly
@@ -184,7 +185,7 @@ to-report travel_cost[me  bat]
   let el_price 0.2 ;; here is a charge at home variable missing
   let Price_gas 1.5 ;; just a guess of 1.5 euro per liter of 
   let el_distance 0
-  let battery_price 150 
+  let battery_price global_battery_price
   foreach [trip_memory] of me [
     set el_distance (bat / 0.2 ) ;; calculates the distance traveled electrically
     if el_distance > ? [set el_distance ?]
@@ -194,5 +195,5 @@ to-report travel_cost[me  bat]
   report cost + battery_price * bat
 end
 to-report calc_tax [me base_price]
-  report 4000 ;; for now just return 4000 euro tax advantage
+  report tax_global ;; for now just return 4000 euro tax advantage
 end 

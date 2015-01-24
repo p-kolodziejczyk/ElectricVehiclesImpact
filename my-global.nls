@@ -11,7 +11,7 @@ EVs-own [EVPeak BatteryCapacity CarOwnership CarAge]
 HHS-own [HHAverage HHPeak]
 users-own [Preference IncSource Income commute_probability commute_average long_dist_probability long_dist trip_memory]
 
-globals [HHGrowMonthly EconGrow HHFactor PrivateCarReplaceAge NonPrivateCarReplaceAge]
+globals [HHGrowMonthly EconGrow HHFactor PrivateCarReplaceAge NonPrivateCarReplaceAge global_battery_price]
 
 to set-global-values ;setting values needs to be embedded within a function 
 set HHGrowMonthly 1.0014 ;; the growth factor of average energy use of a household from 2014 on (excluding EV’s) (1,0014)^12 = 1.017
@@ -19,4 +19,5 @@ set EconGrow 1.02 ; Expected economic growth
 set HHFactor 3 ;a fixed factor based on experience that indicates what the average peak power will be 
 set PrivateCarReplaceAge 72 ; average number of months after which a private car is sold
 set NonPrivateCarReplaceAge 48; average number of months after which a company/lease car is sold
+set global_battery_price global_battery_price_init
 end
