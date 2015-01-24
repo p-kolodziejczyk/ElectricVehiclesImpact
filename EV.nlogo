@@ -16,6 +16,7 @@ to setup-square ;observer
 end
 
 to go ;observer
+  cut-memory
   determine-used-capacity
   update-area-user-impact
   update-friendship-impact
@@ -902,10 +903,10 @@ NetLogo 5.1.0
 @#$#@#$#@
 @#$#@#$#@
 <experiments>
-  <experiment name="experiment" repetitions="50" runMetricsEveryStep="true">
+  <experiment name="experiment" repetitions="25" runMetricsEveryStep="true">
     <setup>setup-square</setup>
     <go>go</go>
-    <timeLimit steps="12"/>
+    <timeLimit steps="240"/>
     <metric>sum [Overcapacity] of Transformers</metric>
     <enumeratedValueSet variable="LVFactor">
       <value value="1.3"/>
@@ -929,7 +930,9 @@ NetLogo 5.1.0
       <value value="1.4"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="average-number-friendships">
-      <value value="25"/>
+      <value value="15"/>
+      <value value="30"/>
+      <value value="45"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="battery_price_drop">
       <value value="0.01"/>
@@ -939,10 +942,16 @@ NetLogo 5.1.0
       <value value="0.2"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="NHRichFactor">
-      <value value="1.5"/>
+      <value value="0.8"/>
+      <value value="1.6"/>
+      <value value="2.4"/>
+      <value value="3"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="impact-on-friendships">
+      <value value="0.025"/>
       <value value="0.05"/>
+      <value value="0.075"/>
+      <value value="0.1"/>
     </enumeratedValueSet>
   </experiment>
 </experiments>

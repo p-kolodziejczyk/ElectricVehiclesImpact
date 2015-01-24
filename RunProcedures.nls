@@ -104,6 +104,14 @@ to go-traveling
     ]
 end
 
+to cut-memory
+  ask users with [any? in-association-neighbors] [
+    if (length trip_memory > 720) [
+      set trip_memory sublist trip_memory (length trip_memory - 720) (length trip_memory)
+      ;;show length trip_memory ;; just to see how many items there are 
+    ]]
+end
+
 to consider-buying-car
   ask users with [any? in-association-neighbors]
   [
