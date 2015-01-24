@@ -11,7 +11,7 @@ to setup-square ;observer
   distribute-demand-capacity
   setup-EVs
   set-travel-parameters
-  repeat 24 [go-traveling]
+  repeat 12 [go-traveling]
   update-plots
 end
 
@@ -268,7 +268,7 @@ average-number-friendships
 average-number-friendships
 0
 60
-25
+36
 1
 1
 NIL
@@ -294,7 +294,7 @@ size-of-area-influence
 size-of-area-influence
 0
 60
-0
+30
 6
 1
 patches
@@ -309,7 +309,7 @@ user-area-impact
 user-area-impact
 0
 0.1
-0
+0.05
 0.005
 1
 NIL
@@ -324,7 +324,7 @@ impact-on-friendships
 impact-on-friendships
 0
 0.1
-0
+0.05
 0.01
 1
 NIL
@@ -518,7 +518,7 @@ tax_global
 tax_global
 0
 5000
-382
+2500
 1
 1
 NIL
@@ -533,7 +533,7 @@ global_battery_price_init
 global_battery_price_init
 0
 500
-150
+120
 1
 1
 NIL
@@ -548,7 +548,7 @@ battery_price_drop
 battery_price_drop
 0
 0.25
-0.25
+0.05
 0.01
 1
 NIL
@@ -901,6 +901,51 @@ NetLogo 5.1.0
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
+<experiments>
+  <experiment name="experiment" repetitions="50" runMetricsEveryStep="true">
+    <setup>setup-square</setup>
+    <go>go</go>
+    <timeLimit steps="12"/>
+    <metric>sum [Overcapacity] of Transformers</metric>
+    <enumeratedValueSet variable="LVFactor">
+      <value value="1.3"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="NHFactor">
+      <value value="1.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="size-of-area-influence">
+      <value value="30"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="user-area-impact">
+      <value value="0.05"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="tax_global">
+      <value value="2500"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="global_battery_price_init">
+      <value value="120"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="TFFactor">
+      <value value="1.4"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="average-number-friendships">
+      <value value="25"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="battery_price_drop">
+      <value value="0.01"/>
+      <value value="0.05"/>
+      <value value="0.1"/>
+      <value value="0.15"/>
+      <value value="0.2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="NHRichFactor">
+      <value value="1.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="impact-on-friendships">
+      <value value="0.05"/>
+    </enumeratedValueSet>
+  </experiment>
+</experiments>
 @#$#@#$#@
 @#$#@#$#@
 default
