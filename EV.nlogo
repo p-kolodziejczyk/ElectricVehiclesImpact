@@ -17,7 +17,8 @@ to setup-square ;observer
 end
 
 to profiler
-setup-square           ;; set up the model
+profiler:reset         ;; clear the data
+setup-square       ;; set up the model
 profiler:start         ;; start profiling
 repeat 180 [ go ]       ;; run something you want to measure
 profiler:stop          ;; stop profiling
@@ -571,7 +572,7 @@ battery_price_drop
 battery_price_drop
 0
 0.25
-0.01
+0
 0.01
 1
 NIL
@@ -950,8 +951,7 @@ NetLogo 5.1.0
     <metric>count HHs</metric>
     <metric>count EVs</metric>
     <metric>count EVs with [BatteryCapacity &gt; 0]</metric>
-    <metric>mean [BatteryCapacity] of EVs with [BatteryCapacity &gt; 0]</metric>
-    <metric>median [BatteryCapacity] of EVs with [BatteryCapacity &gt; 0]</metric>
+    <metric>sum [BatteryCapacity] of EVs with [BatteryCapacity &gt; 0]</metric>
     <enumeratedValueSet variable="LVFactor">
       <value value="1.3"/>
     </enumeratedValueSet>
@@ -983,6 +983,7 @@ NetLogo 5.1.0
       <value value="0.01"/>
       <value value="0.05"/>
       <value value="0.1"/>
+      <value value="0.15"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="NHRichFactor">
       <value value="0.8"/>

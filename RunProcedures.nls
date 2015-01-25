@@ -77,26 +77,23 @@ to determine-used-capacity ;observer
 end
 
 to go-traveling
-  let trip 0
-  repeat 30 [
+
     ask users with [any? in-association-neighbors][
-      ;; calc the commute trip 
-      ifelse (random-float 1 < commute_probability)
+      ;; calc the commute trip
+      repeat 30 [
+      let trip 0 
+      if (random-float 1 < commute_probability)
       [
         set trip random-normal commute_average 5
-        if (trip < 0) [set trip 0]]
-      [
-        set trip 0
-        ]
-      set trip_memory lput trip trip_memory ;; add the trip to the memory 
-      
-      ;; calculate the longer distance trip 
-      ifelse (random-float 1 < long_dist_probability) 
-      [
-        set trip long_dist * random-gamma 1 1 ] ;; basically this gamma distribution comes down to being an exponential but I am not sure enough about that
-      [
-        set trip 0
+        set trip max list 0 trip
       ]
+      set trip_memory lput trip trip_memory ;; add the trip to the memory 
+      set trip 0
+      ;; calculate the longer distance trip 
+      if (random-float 1 < long_dist_probability) 
+      [
+        set trip long_dist * random-gamma 1 1 
+      ] ;; basically this gamma distribution comes down to being an exponential but I am not sure enough about that
       set trip_memory lput trip trip_memory ;; add the trip to the memory 
     ]
     ]
