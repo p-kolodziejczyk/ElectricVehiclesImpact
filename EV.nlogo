@@ -18,9 +18,9 @@ end
 
 to profiler
 profiler:reset         ;; clear the data
-setup-square       ;; set up the model
+                       ;; set up the model
 profiler:start         ;; start profiling
-repeat 180 [ go ]       ;; run something you want to measure
+repeat 5 [ setup-square   ]       ;; run something you want to measure
 profiler:stop          ;; stop profiling
 print profiler:report  ;; view the results
 end
@@ -129,12 +129,13 @@ to distribute-income
 let alpha 484 / 114 ;set distribution parameter 
 let lambda 1 / (114 / 22) ; mean - 22 and variance 114
 ask n-of 10 users [set Income round(income-source * random-gamma alpha lambda)]  ;assign Income to 10 random users 
-while [ any? users with [ Income = 0 ]] [ ; while there are any users with no income
-  ask users with [ income != 0 ] [  ;ask users that already have income
+while [ any? users with [ Income = 0]] [ ; while there are any users with no income
+  ask users with [ income != 0 AND setIncome = 0] [  ;ask users that already have income
       set alpha Income * Income / 22 ;assign mean of the distribution to their income,  swap previous variance with mean
       set lambda 1 / (22 / Income) ;recalculate distribution paremeters
-      ask other users in-radius 6 with [ income = 0 ][set Income round(income-source * random-gamma alpha lambda)] ; assign randomized income to closest neighbours
+      ask users in-radius 6 with [ income = 0 ][set Income round(income-source * random-gamma alpha lambda)] ; assign randomized income to closest neighbours
       if any? users in-radius 30 with [ income = 0 ][ask one-of users in-radius 30 with [ income = 0 ][set Income round(income-source * random-gamma alpha lambda)]] ;and one random user further on
+      set setIncome 1
   ]
 ]
 end
@@ -426,7 +427,7 @@ NHRichFactor
 NHRichFactor
 0.4
 3
-0.8
+0.7
 0.1
 1
 NIL

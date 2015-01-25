@@ -10,7 +10,7 @@ directed-link-breed [area_connections area_connection]
 transformers-own [Capacity Overcapacity Level]
 EVs-own [EVPeak BatteryCapacity CarOwnership CarAge]
 HHS-own [HHAverage HHPeak]
-users-own [Preference IncSource Income commute_probability commute_average long_dist_probability long_dist trip_memory]
+users-own [Preference IncSource Income commute_probability commute_average long_dist_probability long_dist trip_memory setIncome]
 area_connections-own [interval] 
 
 globals [HHGrowMonthly EconGrow HHFactor PrivateCarReplaceAge NonPrivateCarReplaceAge global_battery_price]
