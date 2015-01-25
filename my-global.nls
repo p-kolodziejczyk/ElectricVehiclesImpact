@@ -4,12 +4,14 @@ breed [Transformers Transformer]
 breed [Users User]
 undirected-link-breed [friendships friendship]
 directed-link-breed [power-lines power-line]
-directed-link-breed [associations association] 
+directed-link-breed [associations association]
+directed-link-breed [area_connections area_connection] 
 
 transformers-own [Capacity Overcapacity Level]
 EVs-own [EVPeak BatteryCapacity CarOwnership CarAge]
 HHS-own [HHAverage HHPeak]
 users-own [Preference IncSource Income commute_probability commute_average long_dist_probability long_dist trip_memory]
+area_connections-own [interval] 
 
 globals [HHGrowMonthly EconGrow HHFactor PrivateCarReplaceAge NonPrivateCarReplaceAge global_battery_price]
 

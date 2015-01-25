@@ -9,13 +9,11 @@ end
 
 to update-area-user-impact ;Observer
   ask Users with [any? in-association-neighbors with [BatteryCapacity > 0]][   ;Users with EVs
-    let i 0
-    while [i <= size-of-area-influence / 6][ ;affect all other users within size-of-area-influence radius
-      ask other Users in-radius (6 * i) with [distance myself > (6 * (i - 1))][ ;dividing this area into rings of 6 wide
-          set Preference Preference * (1 + user-area-impact / i) if Preference > 1 [set Preference 1]] ;and increasing Preference of people by user-area-impact but inversly proportionally to distance
-      set i i + 1     
+    ask in-area_connection-neighbors [
+      let i [interval] of out-area_connection-to myself
+      set Preference Preference * (1 + user-area-impact / i) 
+      if Preference > 1 [set Preference 1]] ;and increasing Preference of people by user-area-impact but inversly proportionally to distance  
       ]
-  ]
 end
 
 
@@ -194,12 +192,13 @@ to-report travel_cost[me  bat]
   let Price_gas 1.5 ;; just a guess of 1.5 euro per liter of 
   let el_distance 0
   let battery_price global_battery_price
-  foreach [trip_memory] of me [
+  let trip_aux sublist trip_memory (length trip_memory - 360) (length trip_memory)
+  foreach [trip_aux] of me [
     set el_distance (bat / 0.2 ) ;; calculates the distance traveled electrically
     if el_distance > ? [set el_distance ?]
     set cost cost + (? - el_distance) * 0.06 * Price_gas + el_distance * 0.2 * el_price
   ]
-  set cost (cost / length trip_memory) * 720 ;; normalize on to one year
+  set cost (cost / length trip_aux) * 720 ;; normalize on to one year
   report cost + battery_price * bat
 end
 to-report calc_tax [me base_price]

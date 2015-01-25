@@ -1,5 +1,5 @@
 __includes["my-global.nls" "RunProcedures.nls"]
-
+extensions [profiler]
 
 to setup-square ;observer
   clear-all
@@ -7,6 +7,7 @@ to setup-square ;observer
   set-global-values
   setup-neighbourhoods
   setup-social-circle
+  setup-area-user-impact
   distribute-income
   distribute-demand-capacity
   setup-EVs
@@ -15,8 +16,16 @@ to setup-square ;observer
   update-plots
 end
 
+to profiler
+setup-square           ;; set up the model
+profiler:start         ;; start profiling
+repeat 180 [ go ]       ;; run something you want to measure
+profiler:stop          ;; stop profiling
+print profiler:report  ;; view the results
+end
+
 to go ;observer
-  cut-memory
+  ;cut-memory
   determine-used-capacity
   update-area-user-impact
   update-friendship-impact
@@ -51,6 +60,19 @@ to setup-social-circle; observer
     ask Users [
     create-friendships-with Users with [self > myself and random-float count Users < average-number-friendships][hide-link]] ;create friendships among users so that their average amount to average-number-friendhsips 
     ask Users [set Preference random-float 1.0] ;give them initial value of preference
+end
+
+to setup-area-user-impact
+  ask users
+  [
+    let i 0
+    while [i <= size-of-area-influence / 6][ ;affect all other users within size-of-area-influence radius
+      ask other Users in-radius (6 * i) with [distance myself > (6 * (i - 1))][ ;dividing this area into rings of 6 wide
+        create-area_connection-to myself [set interval i hide-link] 
+      ]
+      set i i + 1     
+    ]
+  ]
 end
 
 to setup-EVs ; observer
@@ -269,7 +291,7 @@ average-number-friendships
 average-number-friendships
 0
 60
-36
+15
 1
 1
 NIL
@@ -295,7 +317,7 @@ size-of-area-influence
 size-of-area-influence
 0
 60
-30
+12
 6
 1
 patches
@@ -310,7 +332,7 @@ user-area-impact
 user-area-impact
 0
 0.1
-0.05
+0.01
 0.005
 1
 NIL
@@ -325,7 +347,7 @@ impact-on-friendships
 impact-on-friendships
 0
 0.1
-0.05
+0.03
 0.01
 1
 NIL
@@ -403,7 +425,7 @@ NHRichFactor
 NHRichFactor
 0.4
 3
-1.5
+0.8
 0.1
 1
 NIL
@@ -549,11 +571,28 @@ battery_price_drop
 battery_price_drop
 0
 0.25
-0.05
+0.01
 0.01
 1
 NIL
 HORIZONTAL
+
+BUTTON
+14
+103
+85
+136
+NIL
+profiler
+NIL
+1
+T
+OBSERVER
+NIL
+P
+NIL
+NIL
+1
 
 @#$#@#$#@
 ## WHAT IS IT?
@@ -903,11 +942,16 @@ NetLogo 5.1.0
 @#$#@#$#@
 @#$#@#$#@
 <experiments>
-  <experiment name="experiment" repetitions="25" runMetricsEveryStep="true">
+  <experiment name="experiment2" repetitions="20" runMetricsEveryStep="true">
     <setup>setup-square</setup>
     <go>go</go>
-    <timeLimit steps="240"/>
+    <timeLimit steps="180"/>
     <metric>sum [Overcapacity] of Transformers</metric>
+    <metric>count HHs</metric>
+    <metric>count EVs</metric>
+    <metric>count EVs with [BatteryCapacity &gt; 0]</metric>
+    <metric>mean [BatteryCapacity] of EVs with [BatteryCapacity &gt; 0]</metric>
+    <metric>median [BatteryCapacity] of EVs with [BatteryCapacity &gt; 0]</metric>
     <enumeratedValueSet variable="LVFactor">
       <value value="1.3"/>
     </enumeratedValueSet>
@@ -915,10 +959,12 @@ NetLogo 5.1.0
       <value value="1.5"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="size-of-area-influence">
-      <value value="30"/>
+      <value value="18"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="user-area-impact">
+      <value value="0.01"/>
       <value value="0.05"/>
+      <value value="0.1"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="tax_global">
       <value value="2500"/>
@@ -932,26 +978,21 @@ NetLogo 5.1.0
     <enumeratedValueSet variable="average-number-friendships">
       <value value="15"/>
       <value value="30"/>
-      <value value="45"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="battery_price_drop">
       <value value="0.01"/>
       <value value="0.05"/>
       <value value="0.1"/>
-      <value value="0.15"/>
-      <value value="0.2"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="NHRichFactor">
       <value value="0.8"/>
       <value value="1.6"/>
       <value value="2.4"/>
-      <value value="3"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="impact-on-friendships">
-      <value value="0.025"/>
-      <value value="0.05"/>
-      <value value="0.075"/>
-      <value value="0.1"/>
+      <value value="0.03"/>
+      <value value="0.06"/>
+      <value value="0.09"/>
     </enumeratedValueSet>
   </experiment>
 </experiments>
