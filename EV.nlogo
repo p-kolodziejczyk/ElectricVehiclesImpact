@@ -68,7 +68,7 @@ to setup-area-user-impact
     let i 0
     while [i <= size-of-area-influence / 6][ ;affect all other users within size-of-area-influence radius
       ask other Users in-radius (6 * i) with [distance myself > (6 * (i - 1))][ ;dividing this area into rings of 6 wide
-        create-area_connection-to myself [set interval i hide-link] 
+        create-area_connection-to myself [hide-link set interval i] 
       ]
       set i i + 1     
     ]
@@ -78,7 +78,7 @@ end
 to setup-EVs ; observer
   set-default-shape EVs "car"
   let AverageIncome (sum [Income] of users / count users / NHRichFactor)
-  ask users [If ( random-normal ( 0.7 * Income / AverageIncome ) 1.5 > 0)[ hatch-EVs 1 [set ycor ycor - 3 create-association-to myself create-associations-to [out-link-neighbors] of myself]]]  
+  ask users [If ( random-normal ( 0.7 * Income / AverageIncome ) 1.5 > 0)[ hatch-EVs 1 [set ycor ycor - 3 create-association-to myself create-associations-to [out-association-neighbors] of myself]]]  
   ask users with [any? in-association-neighbors]
   [
     let prob_private 0

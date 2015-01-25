@@ -144,7 +144,7 @@ to replace-car [me] ;@user
      hatch-EVs 1 [
        set CarOwnership carown
        ifelse CarOwnership = 0 [set color cyan][ ifelse CarOwnership = 1 [set color magenta] [set color violet ]]
-       set ycor ycor - 3 create-association-to me create-associations-to [out-link-neighbors] of me
+       set ycor ycor - 3 create-association-to me create-associations-to [out-association-neighbors] of me
        set CarAge 0
        set BatteryCapacity batterysize
        set EVPeak charge_power * ev_coincidence batterysize
@@ -155,7 +155,7 @@ to replace-car [me] ;@user
    hatch-EVs 1 [ 
        set CarOwnership carown
        ifelse CarOwnership = 0 [set color cyan][ ifelse CarOwnership = 1 [set color magenta] [set color violet ]]
-       set ycor ycor - 3 create-association-to me create-associations-to [out-link-neighbors] of me
+       set ycor ycor - 3 create-association-to me create-associations-to [out-association-neighbors] of me
        set CarAge 0
        set BatteryCapacity 0
        set EVPeak 0
@@ -192,7 +192,7 @@ to-report travel_cost[me  bat]
   let Price_gas 1.5 ;; just a guess of 1.5 euro per liter of 
   let el_distance 0
   let battery_price global_battery_price
-  let trip_aux sublist trip_memory (length trip_memory - 360) (length trip_memory)
+  let trip_aux sublist trip_memory (length trip_memory - 720) (length trip_memory)
   foreach [trip_aux] of me [
     set el_distance (bat / 0.2 ) ;; calculates the distance traveled electrically
     if el_distance > ? [set el_distance ?]
