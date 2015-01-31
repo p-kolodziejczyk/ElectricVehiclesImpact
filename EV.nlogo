@@ -293,7 +293,7 @@ average-number-friendships
 average-number-friendships
 0
 60
-15
+30
 1
 1
 NIL
@@ -319,7 +319,7 @@ size-of-area-influence
 size-of-area-influence
 0
 60
-12
+18
 6
 1
 patches
@@ -334,7 +334,7 @@ user-area-impact
 user-area-impact
 0
 0.1
-0.01
+0.1
 0.005
 1
 NIL
@@ -349,7 +349,7 @@ impact-on-friendships
 impact-on-friendships
 0
 0.1
-0.03
+0.09
 0.01
 1
 NIL
@@ -427,7 +427,7 @@ NHRichFactor
 NHRichFactor
 0.4
 3
-0.7
+2.4
 0.1
 1
 NIL
@@ -573,7 +573,7 @@ battery_price_drop
 battery_price_drop
 0
 0.25
-0
+0.1
 0.01
 1
 NIL
@@ -963,7 +963,7 @@ NetLogo 5.1.0
   <experiment name="experiment2" repetitions="20" runMetricsEveryStep="true">
     <setup>setup-square</setup>
     <go>go</go>
-    <timeLimit steps="180"/>
+    <timeLimit steps="120"/>
     <metric>sum [Overcapacity] of Transformers</metric>
     <metric>count HHs</metric>
     <metric>count EVs</metric>
@@ -993,14 +993,68 @@ NetLogo 5.1.0
       <value value="1.4"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="average-number-friendships">
-      <value value="15"/>
       <value value="30"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="battery_price_drop">
       <value value="0.01"/>
       <value value="0.05"/>
       <value value="0.1"/>
-      <value value="0.15"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="NHRichFactor">
+      <value value="0.8"/>
+      <value value="1.6"/>
+      <value value="2.4"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="impact-on-friendships">
+      <value value="0.03"/>
+      <value value="0.06"/>
+      <value value="0.09"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="WhenFusesBlow" repetitions="20" runMetricsEveryStep="true">
+    <setup>setup-square</setup>
+    <go>go</go>
+    <timeLimit steps="120"/>
+    <exitCondition>all? Transformers [color = red]</exitCondition>
+    <metric>sum [Overcapacity] of Transformers</metric>
+    <metric>count HHs</metric>
+    <metric>count EVs</metric>
+    <metric>count EVs with [BatteryCapacity &gt; 0]</metric>
+    <metric>sum [BatteryCapacity] of EVs with [BatteryCapacity &gt; 0]</metric>
+    <metric>count Transformers with [level = "LVTransformer"]</metric>
+    <metric>count Transformers with [level = "LVline"]</metric>
+    <metric>count Transformers with [color = red]</metric>
+    <metric>mean [Preference] of users</metric>
+    <enumeratedValueSet variable="LVFactor">
+      <value value="1.3"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="NHFactor">
+      <value value="1.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="size-of-area-influence">
+      <value value="18"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="user-area-impact">
+      <value value="0.01"/>
+      <value value="0.05"/>
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="tax_global">
+      <value value="2500"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="global_battery_price_init">
+      <value value="120"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="TFFactor">
+      <value value="1.4"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="average-number-friendships">
+      <value value="30"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="battery_price_drop">
+      <value value="0.01"/>
+      <value value="0.05"/>
+      <value value="0.1"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="NHRichFactor">
       <value value="0.8"/>
