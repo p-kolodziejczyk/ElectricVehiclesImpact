@@ -643,11 +643,9 @@ battery_price_drop: sets by how much the price of batteries drop each year
 
 ## THINGS TO NOTICE
 
-(suggested things for the user to notice while running the model)
-
-## THINGS TO TRY
-
-(suggested things for the user to try to do (move sliders, switches, etc.) with the model)
+Note: When running an experiment and it outputs a java error like this:
+”Error java.lang.OutOfMemoryError: GC overhead limit exceeded”,
+ the number of simultaneous runs should be reduced. If it still runs very slowly reducing the number of simultaneous runs can increase overall speed.
 @#$#@#$#@
 default
 true
