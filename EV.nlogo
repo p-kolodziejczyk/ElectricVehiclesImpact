@@ -656,6 +656,10 @@ Try to think of scenarios that would increase electric vehicle coverage faster a
 
 
 _An extensive description should be available with the model in a form of a report_. 
+=======
+Note: When running an experiment and it outputs a java error like this:
+”Error java.lang.OutOfMemoryError: GC overhead limit exceeded”,
+ the number of simultaneous runs should be reduced. If it still runs very slowly reducing the number of simultaneous runs can increase overall speed.
 @#$#@#$#@
 default
 true
